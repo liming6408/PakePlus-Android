@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电子宠物</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:sans-serif;background:#f0f2ff;min-height:100vh;font-size:14px}
+
+#page1{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#667eea,#764ba2)}
+#page1 h1{color:#fff;font-size:1.5em;margin-bottom:6px}
+#page1 .sub{color:rgba(255,255,255,.8);margin-bottom:18px;font-size:.85em}
+.grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:380px}
+.pcard{width:75px;height:85px;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.pcard.sel{border-color:#FFD93D;background:rgba(255,255,255,.3);box-shadow:0 0 12px rgba(255,217,61,.5)}
+.pcard .pe{font-size:1.8em}
+.pcard .pn{color:#fff;font-size:.65em;margin-top:3px;font-weight:600}
+#nameInp{margin-top:18px;padding:11px 18px;border:none;border-radius:18px;font-size:1em;width:200px;text-align:center;outline:none}
+#goBtn{margin-top:12px;padding:12px 36px;background:#FFD93D;border:none;border-radius:18px;font-size:1em;font-weight:700;cursor:pointer}
+#tip{color:#FFE082;margin-top:8px;font-size:.8em;min-height:18px}
+
+#page2{display:none;max-width:460px;margin:0 auto;padding:14px;padding-bottom:75px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.bar .nm{font-weight:700;color:#6C63FF;font-size:1em}
+.bar .pt{background:#6C63FF;color:#fff;padding:4px 12px;border-radius:12px;font-size:.82em;font-weight:700}
+.streak{background:linear-gradient(135deg,#FF9A56,#FF6B6B);border-radius:12px;padding:10px 14px;color:#fff;display:flex;justify-content:space-between;margin-bottom:12px;font-size:.85em}
+.petbox{background:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,.05)}
+.petbox .av{font-size:3.5em}
+.petbox .pn{font-size:1em;font-weight:700;margin-top:4px}
+.petbox .lv{display:inline-block;background:linear-gradient(135deg,#FFD93D,#FFA502);padding:2px 10px;border-radius:8px;font-size:.75em;font-weight:600;margin-top:4px}
+.petbox .md{font-size:.8em;color:#888;margin-top:4px}
+.expbg{height:8px;background:#e8e8ff;border-radius:4px;margin-top:10px;overflow:hidden}
+.expfill{height:100%;background:linear-gradient(90deg,#6C63FF,#8B85FF);border-radius:4px;transition:width .4s}
+.exptxt{font-size:.7em;color:#888;margin-top:3px}
+.tabs{display:flex;gap:5px;margin-bottom:12px}
+.tabs button{flex:1;padding:9px 2px;border:none;border-radius:8px;background:#fff;font-weight:600;font-size:.75em;cursor:pointer;color:#888}
+.tabs button.on{background:#6C63FF;color:#fff}
+.pnl{display:none}
+.pnl.show{display:block}
+.card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
+.card .top{display:flex;align-items:center;gap:8px}
+.card .ci{width:36px;height:36px;background:#f0f2ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1em;flex-shrink:0}
+.card .cf{flex:1}
+.card .cn{font-weight:600;font-size:.88em}
+.card .cp{font-size:.72em;color:#888;margin-top:2px}
+.card .desc{font-size:.78em;color:#666;margin-top:6px;padding:6px 8px;background:#f8f9ff;border-radius:6px;line-height:1.4}
+.card .tmr{margin-top:6px;font-size:.85em;color:#FF6B6B;font-weight:700}
+.card .btns{display:flex;gap:6px;margin-top:8px;align-items:center}
+.card.done{opacity:.6}
+.card.done .cn{text-decoration:line-through}
+.bsm{padding:6px 12px;border:none;border-radius:6px;color:#fff;font-weight:600;font-size:.78em;cursor:pointer}
+.bg{background:#4ECB71}.br{background:#FF6B6B}.bo{background:#FFA502}.bp{background:#6C63FF}
+.bsm:disabled{background:#ddd;cursor:default}
+.stag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:.68em;font-weight:600;margin-left:4px}
+.stag.s0{background:#e8e8ff;color:#6C63FF}
+.stag.s1{background:#fff3e0;color:#FFA502}
+.stag.s2{background:#fff8e1;color:#F57F17}
+.stag.s3{background:#fce4ec;color:#FF6B6B}
+.stag.s4{background:#e8f5e9;color:#4ECB71}
+.cal{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px}
+.cal .chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal .chead .ct{font-weight:700;font-size:1em}
+.cal .chead button{background:none;border:none;font-size:1.2em;cursor:pointer;padding:4px 10px}
+.cal .cw{display:flex;margin-bottom:4px}
+.cal .cw span{flex:1;text-align:center;font-size:.7em;color:#888;font-weight:600}
+.cal .cd{display:flex;flex-wrap:wrap}
+.cal .dd{width:14.28%;text-align:center;padding:7px 0;font-size:.8em;position:relative;cursor:pointer;border-radius:6px}
+.cal .dd:hover{background:#f0f2ff}
+.cal .dd.today{background:#6C63FF;color:#fff;font-weight:700}
+.cal .dd .dot{position:absolute;bottom:2px;left:50%;margin-left:-2px;width:5px;height:5px;border-radius:50%}
+.cal .dd .dot.g{background:#4ECB71}
+.cal .dd .dot.y{background:#FFA502}
+.cal .dd.other{color:#ccc}
+.cal .detail{margin-top:10px;padding:10px;background:#f8f9ff;border-radius:8px;font-size:.8em}
+.cal .detail .di{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee}
+.cal .detail .di:last-child{border:none}
+.plock{text-align:center;padding:30px}
+.plock input{padding:10px 16px;border:2px solid #e8e8ff;border-radius:10px;font-size:1em;text-align:center;width:180px;outline:none;margin:10px 0}
+.plock .err{color:#FF6B6B;font-size:.8em;min-height:18px}
+.psection{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px}
+.psection h3{font-size:.9em;color:#6C63FF;margin-bottom:10px}
+.prow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:.85em}
+.prow:last-child{border:none}
+.review-card{background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;border-left:3px solid #FFA502}
+.review-card .rn{font-weight:600;font-size:.88em}
+.review-card .rd{font-size:.78em;color:#666;margin-top:4px}
+.review-card .rbtns{display:flex;gap:8px;margin-top:8px}
+.mgmt-item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.mgmt-item:last-child{border:none}
+.mgmt-item .mi{flex:1}
+.mgmt-item .mn{font-weight:600;font-size:.85em}
+.mgmt-item .md2{font-size:.72em;color:#888;margin-top:2px}
+.mgmt-item .del{width:28px;height:28px;background:#fce4ec;border:none;border-radius:6px;color:#FF6B6B;font-size:1em;cursor:pointer;flex-shrink:0}
+.addbox{background:#fff;border-radius:12px;padding:14px;margin-top:10px}
+.addbox h4{color:#6C63FF;font-size:.88em;margin-bottom:8px}
+.addbox .row{margin-bottom:8px}
+.addbox label{display:block;font-size:.75em;color:#888;margin-bottom:3px;font-weight:600}
+.addbox input,.addbox select,.addbox textarea{width:100%;padding:9px 10px;border:2px solid #e8e8ff;border-radius:8px;font-size:.85em;outline:none}
+.addbox textarea{height:50px;resize:vertical}
+.addbox .row2{display:flex;gap:8px}
+.addbox .row2 div{flex:1}
+.bfull{width:100%;padding:10px;background:#6C63FF;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88em;margin-top:4px}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;justify-content:space-around;padding:8px 0;box-shadow:0 -2px 12px rgba(0,0,0,.06);z-index:99}
+.bnav .ni{text-align:center;cursor:pointer;font-size:.65em;color:#888;padding:2px 8px}
+.bnav .ni .ic{font-size:1.8em}
+.bnav .ni.on{color:#6C63FF}
+.mbg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;padding:20px}
+.mbg.show{display:flex}
+.mbox{background:#fff;border-radius:18px;padding:24px;text-align:center;max-width:300px;width:100%}
+.mbox .me{font-size:3em}
+.mbox h3{margin:6px 0;font-size:1.05em}
+.mbox p{color:#888;font-size:.85em;margin-bottom:14px;line-height:1.4}
+.mbox button{padding:10px 24px;background:#6C63FF;color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+.rdel{width:28px;height:28px;background:#fce4ec;border:none;border-radius:6px;color:#FF6B6B;font-size:1em;cursor:pointer;flex-shrink:0;margin-left:4px}
+</style>
+</head>
+<body>
+
+<div id="page1">
+  <h1>🌟 选择你的小伙伴</h1>
+  <p class="sub">完成任务赚积分，喂养宠物！</p>
+  <div class="grid" id="grid"></div>
+  <input id="nameInp" placeholder="输入你的名字" maxlength="8">
+  <button id="goBtn">开始冒险 🚀</button>
+  <div id="tip"></div>
+</div>
+
+<div id="page2">
+  <div class="bar"><span class="nm" id="dNm"></span><span class="pt">⭐ <span id="dPt">0</span></span></div>
+  <div class="streak"><span>🔥 连续 <b id="dSk">0</b> 天</span><span>今日 <b id="dTd">0/0</b></span></div>
+  <div class="petbox">
+    <div class="av" id="dAv">🐶</div>
+    <div class="pn" id="dPn"></div>
+    <div class="lv" id="dLv">Lv.1</div>
+    <div class="md" id="dMd">心情：开心 😊</div>
+    <div class="expbg"><div class="expfill" id="dEf" style="width:0%"></div></div>
+    <div class="exptxt" id="dEt">0/50</div>
+  </div>
+  <div class="tabs" id="tabBtns">
+    <button class="on">📋任务</button><button>📅日历</button><button>🎁奖励</button><button>👨‍👩‍👧家长</button>
+  </div>
+  <div class="pnl show" id="pnl0"><div id="tList"></div></div>
+  <div class="pnl" id="pnl1">
+    <div class="cal">
+      <div class="chead"><button id="calPrev">◀</button><span class="ct" id="calTitle"></span><button id="calNext">▶</button></div>
+      <div class="cw"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="cd" id="calDays"></div>
+      <div class="detail" id="calDetail" style="display:none"></div>
+    </div>
+  </div>
+  <div class="pnl" id="pnl2">
+    <div id="rList"></div>
+    <div class="addbox"><h4>➕ 添加奖励</h4>
+      <div class="row"><label>名称</label><input id="nrN" placeholder="如：看动画片30分钟"></div>
+      <div class="row"><label>所需积分</label><input id="nrC" type="number" value="30" min="1"></div>
+      <button class="bfull" id="addRBtn">添加</button>
+    </div>
+  </div>
+  <div class="pnl" id="pnl3">
+    <div id="parentLock" class="plock">
+      <p style="font-size:2em;margin-bottom:8px">🔒</p>
+      <p style="color:#888;font-size:.9em">家长验证</p>
+      <input id="pinInp" type="password" placeholder="密码(默认1234)">
+      <br><button class="bsm bp" id="pinBtn" style="margin-top:8px;padding:10px 24px">进入</button>
+      <div class="err" id="pinErr"></div>
+    </div>
+    <div id="parentPanel" style="display:none">
+      <div class="psection"><h3>📝 待审核 (<span id="rvCount">0</span>)</h3><div id="reviewList"></div></div>
+      <div class="psection"><h3>📋 任务管理 (<span id="taskCount">0</span>)</h3><div id="mgmtList"></div></div>
+      <div class="psection"><h3>➕ 添加任务</h3>
+        <div class="row"><label>任务名称</label><input id="ntN" placeholder="如：阅读课外书"></div>
+        <div class="row"><label>具体要求</label><textarea id="ntD" placeholder="如：阅读30分钟，读后复述"></textarea></div>
+        <div class="row2"><div><label>基础积分</label><input id="ntP" type="number" value="5" min="1" max="50"></div><div><label>限时(分钟)</label><input id="ntT" type="number" value="30" min="1" max="180"></div></div>
+        <div class="row"><label>图标</label><select id="ntI"><option>⭐</option><option>📖</option><option>🏃</option><option>🎨</option><option>🧹</option><option>🎵</option><option>💪</option><option>🌱</option><option>✏️</option><option>🧮</option></select></div>
+        <button class="bfull" id="addTBtn">添加任务</button>
+      </div>
+      <div class="psection"><h3>⚙️ 设置</h3>
+        <div class="prow"><span>修改密码</span><button class="bsm bp" id="chgPinBtn">修改</button></div>
+        <div class="prow"><span>重置今日任务</span><button class="bsm bo" id="rstBtn">重置</button></div>
+        <div class="prow"><span>清除全部数据</span><button class="bsm br" id="delBtn">清除</button></div>
+        <div class="prow"><span>退出家长模式</span><button class="bsm" style="background:#888" id="exitPBtn">退出</button></div>
+      </div>
+      <div class="psection"><h3>📊 统计</h3>
+        <div class="prow"><span>累计积分</span><b id="st1">0</b></div>
+        <div class="prow"><span>完成任务</span><b id="st2">0</b></div>
+        <div class="prow"><span>兑换奖励</span><b id="st3">0</b></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bnav" id="bnav" style="display:none">
+  <div class="ni on"><div class="ic">📋</div>任务</div>
+  <div class="ni"><div class="ic">📅</div>日历</div>
+  <div class="ni"><div class="ic">🎁</div>奖励</div>
+  <div class="ni"><div class="ic">👨‍👩‍👧</div>家长</div>
+</div>
+
+<div class="mbg" id="mbg"><div class="mbox"><div class="me" id="mE">🎉</div><h3 id="mT"></h3><p id="mP"></p><button id="mBtn">好的</button></div></div>
+
+<script>
+try{
+
+var S=null,sel=0,calY=2025,calM=0;
+var PETS=[{e:'🐶',n:'小柴犬'},{e:'🐱',n:'小猫咪'},{e:'🐰',n:'小兔子'},{e:'🐼',n:'小熊猫'},{e:'🐧',n:'小企鹅'},{e:'🦕',n:'小恐龙'},{e:'🦄',n:'独角兽'},{e:'🦊',n:'小狐狸'}];
+var LVTXT=['幼年体','成长体','少年体','青年体','壮年体','成熟体','究极体','传说体'];
+var LVE=[50,120,220,350,520,750,1050,999999];
+
+function $(id){return document.getElementById(id)}
+function save(){try{localStorage.setItem('pet4',JSON.stringify(S))}catch(e){}}
+function tdy(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function pad(n){return n<10?'0'+n:''+n}
+function fmtT(s){var m=Math.floor(s/60);return pad(m)+':'+pad(s%60)}
+
+function fixData(d){
+  if(!d)return null;
+  if(!d.nm)return null;
+  if(!d.tasks)d.tasks=[];
+  if(!d.rwd)d.rwd=[];
+  if(!d.hist)d.hist=[];
+  if(!d.cal)d.cal={};
+  if(!d.pin)d.pin='1234';
+  if(!d.pts&&d.pts!==0)d.pts=0;
+  if(!d.tp)d.tp=0;
+  if(!d.td)d.td=0;
+  if(!d.tr)d.tr=0;
+  if(!d.exp)d.exp=0;
+  if(!d.lv)d.lv=1;
+  if(!d.sk)d.sk=0;
+  if(!d.day)d.day=tdy();
+  if(d.pet===undefined)d.pet=0;
+  for(var i=0;i<d.tasks.length;i++){
+    var t=d.tasks[i];
+    if(t.st===undefined)t.st=0;
+    if(t.bonus===undefined)t.bonus=0;
+    if(t.ts===undefined)t.ts=0;
+    if(t.tl===undefined)t.tl=30;
+    if(!t.d)t.d='';
+  }
+  return d;
+}
+
+function buildGrid(){
+  var h='';
+  for(var i=0;i<PETS.length;i++){
+    h+='<div class="pcard'+(i===sel?' sel':'')+'" onclick="pickPet('+i+')"><span class="pe">'+PETS[i].e+'</span><span class="pn">'+PETS[i].n+'</span></div>';
+  }
+  $('grid').innerHTML=h;
+}
+
+function pickPet(i){
+  sel=i;
+  var cs=$('grid').children;
+  for(var j=0;j<cs.length;j++)cs[j].className='pcard';
+  cs[i].className='pcard sel';
+}
+
+function startGame(){
+  var nm=$('nameInp').value.replace(/^\s+|\s+$/g,'');
+  if(!nm){$('tip').textContent='⚠️ 请输入名字';return}
+  S={nm:nm,pet:sel,pts:0,tp:0,td:0,tr:0,exp:0,lv:1,sk:0,day:tdy(),pin:'1234',
+    tasks:[
+      {id:1,n:'按时起床',d:'早上7:30前起床',p:5,ic:'⏰',tl:5,st:0,bonus:0,ts:0},
+      {id:2,n:'刷牙洗脸',d:'认真刷牙2分钟',p:3,ic:'🪥',tl:5,st:0,bonus:0,ts:0},
+      {id:3,n:'完成作业',d:'独立完成，书写工整',p:10,ic:'📝',tl:60,st:0,bonus:0,ts:0},
+      {id:4,n:'阅读30分钟',d:'读课外书，读后复述',p:8,ic:'📖',tl:35,st:0,bonus:0,ts:0},
+      {id:5,n:'运动锻炼',d:'户外运动或跳绳30分钟',p:8,ic:'🏃',tl:35,st:0,bonus:0,ts:0},
+      {id:6,n:'帮忙做家务',d:'洗碗/扫地/整理房间',p:7,ic:'🧹',tl:20,st:0,bonus:0,ts:0},
+      {id:7,n:'按时睡觉',d:'晚上9:30前上床',p:5,ic:'🌙',tl:5,st:0,bonus:0,ts:0}
+    ],
+    rwd:[{id:1,n:'看动画片30分钟',c:20,ic:'📺'},{id:2,n:'选择晚餐',c:15,ic:'🍽️'},{id:3,n:'去公园玩',c:30,ic:'🏞️'},{id:4,n:'买小玩具',c:50,ic:'🧸'},{id:5,n:'吃冰淇淋',c:20,ic:'🍦'},{id:6,n:'去游乐场',c:80,ic:'🎢'}],
+    hist:[],cal:{}
+  };
+  save();enterMain();
+}
+
+function enterMain(){
+  $('page1').style.display='none';
+  $('page2').style.display='block';
+  $('bnav').style.display='flex';
+  checkNewDay();
+  var now=new Date();calY=now.getFullYear();calM=now.getMonth();
+  drawAll();
+}
+
+function checkNewDay(){
+  if(!S)return;
+  var t=tdy();
+  if(S.day!==t){
+    if(S.cal[S.day]&&S.cal[S.day].done>0){
+      S.sk++;
+    }else if(S.cal[S.day]&&S.cal[S.day].done===0){
+      S.sk=0;
+    }
+    for(var i=0;i<S.tasks.length;i++){
+      if(S.tasks[i].st===4||S.tasks[i].st===1||S.tasks[i].st===2||S.tasks[i].st===3){
+        S.tasks[i].st=0;S.tasks[i].ts=0;S.tasks[i].bonus=0;
+      }
+    }
+    S.day=t;save();
+  }
+}
+
+function drawAll(){
+  if(!S)return;
+  try{
+    var p=PETS[S.pet]||PETS[0];
+    var done=0;
+    for(var i=0;i<S.tasks.length;i++)if(S.tasks[i].st===4)done++;
+    $('dNm').textContent=S.nm+' 的小窝';
+    $('dPt').textContent=S.pts;
+    $('dSk').textContent=S.sk;
+    $('dTd').textContent=done+'/'+S.tasks.length;
+    $('dAv').textContent=p.e;
+    $('dPn').textContent=p.n;
+    $('dLv').textContent='Lv.'+S.lv+' '+LVTXT[Math.min(S.lv-1,7)];
+    $('dMd').textContent=done>=6?'心情：超开心 🤩':done>=3?'心情：很开心 🥰':'心情：开心 😊';
+    var need=LVE[Math.min(S.lv-1,7)],prev=S.lv>=2?LVE[Math.min(S.lv-2,7)]:0;
+    var pct=S.lv>=8?100:Math.min((S.exp-prev)/(need-prev)*100,100);
+    $('dEf').style.width=pct+'%';
+    $('dEt').textContent=S.lv>=8?'🎉满级':S.exp+'/'+need;
+    drawTasks();drawRewards();drawCal();drawReview();drawMgmt();
+    $('st1').textContent=S.tp;$('st2').textContent=S.td;$('st3').textContent=S.tr;
+  }catch(e){console.error(e)}
+}
+
+function drawTasks(){
+  if(!S)return;
+  var h='',stTxt=['待开始','进行中','待审核','已拒绝','已通过'],stCls=['s0','s1','s2','s3','s4'];
+  for(var i=0;i<S.tasks.length;i++){
+    var t=S.tasks[i];
+    h+='<div class="card'+(t.st===4?' done':'')+'"><div class="top"><div class="ci">'+t.ic+'</div><div class="cf">';
+    h+='<div class="cn">'+t.n+'<span class="stag '+stCls[t.st]+'">'+stTxt[t.st]+'</span></div>';
+    h+='<div class="cp">+'+t.p+'分 | 限时'+t.tl+'分</div></div></div>';
+    if(t.d)h+='<div class="desc">📋 '+t.d+'</div>';
+    if(t.st===1)h+='<div class="tmr" id="tmr_'+t.id+'">⏱ '+fmtT(getRemain(t))+'</div>';
+    h+='<div class="btns">';
+    if(t.st===0)h+='<button class="bsm bp" onclick="doStart('+t.id+')">▶ 开始</button>';
+    else if(t.st===1)h+='<button class="bsm bg" onclick="doFinish('+t.id+')">✓ 完成</button><button class="bsm" style="background:#999" onclick="doCancel('+t.id+')">取消</button>';
+    else if(t.st===2)h+='<span style="font-size:.8em;color:#FFA502">⏳ 等待家长审核</span>';
+    else if(t.st===3)h+='<button class="bsm bp" onclick="doRetry('+t.id+')">🔄 重新做</button>';
+    else if(t.st===4)h+='<span style="font-size:.8em;color:#4ECB71">✅ 已完成</span>';
+    h+='</div></div>';
+  }
+  $('tList').innerHTML=h||'<p style="text-align:center;color:#888;padding:20px">暂无任务</p>';
+}
+
+function getRemain(t){
+  if(!t.ts)return t.tl*60;
+  var r=t.tl*60-Math.floor((Date.now()-t.ts)/1000);
+  return r>0?r:0;
+}
+
+function doStart(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    if(S.tasks[i].id===id&&S.tasks[i].st===0){
+      S.tasks[i].st=1;S.tasks[i].ts=Date.now();S.tasks[i].bonus=0;
+      save();drawTasks();return;
+    }
+  }
+}
+
+function doFinish(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    var t=S.tasks[i];
+    if(t.id===id&&t.st===1){
+      var remain=getRemain(t),bonus=0;
+      if(remain>t.tl*30)bonus=Math.ceil(t.p*0.5);
+      else if(remain>0)bonus=Math.ceil(t.p*0.2);
+      t.bonus=bonus;t.st=2;t.ts=0;
+      save();drawTasks();
+      pop('📤','已提交','「'+t.n+'」等待审核'+(bonus>0?'，提前+'+bonus+'分':''));
+      return;
+    }
+  }
+}
+
+function doCancel(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    if(S.tasks[i].id===id&&S.tasks[i].st===1){
+      S.tasks[i].st=0;S.tasks[i].ts=0;save();drawTasks();return;
+    }
+  }
+}
+
+function doRetry(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    if(S.tasks[i].id===id&&S.tasks[i].st===3){
+      S.tasks[i].st=0;S.tasks[i].bonus=0;save();drawTasks();return;
+    }
+  }
+}
+
+// 倒计时
+setInterval(function(){
+  if(!S||!S.tasks)return;
+  for(var i=0;i<S.tasks.length;i++){
+    var t=S.tasks[i];
+    if(t.st===1){
+      var el=$('tmr_'+t.id);
+      if(el){
+        var r=getRemain(t);
+        el.textContent='⏱ '+fmtT(r);
+        if(r<=0){t.st=0;t.ts=0;save();drawTasks();}
+      }
+    }
+  }
+},1000);
+
+// 任务管理+删除
+function drawMgmt(){
+  if(!S)return;
+  var h='';
+  for(var i=0;i<S.tasks.length;i++){
+    var t=S.tasks[i];
+    h+='<div class="mgmt-item"><div class="mi"><div class="mn">'+t.ic+' '+t.n+'</div>';
+    h+='<div class="md2">+'+t.p+'分 | 限时'+t.tl+'分</div></div>';
+    h+='<button class="del" onclick="delTask('+t.id+')">✕</button></div>';
+  }
+  $('mgmtList').innerHTML=h||'<p style="color:#888;font-size:.85em">暂无任务</p>';
+  $('taskCount').textContent=S.tasks.length;
+}
+
+function delTask(id){
+  if(!S)return;
+  var name='';
+  for(var i=0;i<S.tasks.length;i++)if(S.tasks[i].id===id)name=S.tasks[i].n;
+  if(!confirm('删除任务「'+name+'」？'))return;
+  var arr=[];
+  for(var i=0;i<S.tasks.length;i++)if(S.tasks[i].id!==id)arr.push(S.tasks[i]);
+  S.tasks=arr;
+  save();drawTasks();drawMgmt();
+  pop('🗑️','已删除','「'+name+'」已删除');
+}
+
+// 审核
+function drawReview(){
+  if(!S)return;
+  var h='',cnt=0;
+  for(var i=0;i<S.tasks.length;i++){
+    if(S.tasks[i].st===2){
+      cnt++;var t=S.tasks[i];
+      h+='<div class="review-card"><div class="rn">'+t.ic+' '+t.n+'</div>';
+      if(t.d)h+='<div class="rd">'+t.d+'</div>';
+      h+='<div class="rd" style="color:#4ECB71">基础+'+t.p+(t.bonus>0?' | 提前+'+t.bonus:'')+'</div>';
+      h+='<div class="rbtns"><button class="bsm bg" onclick="doApprove('+t.id+')">✓ 通过</button>';
+      h+='<button class="bsm br" onclick="doReject('+t.id+')">✗ 拒绝</button></div></div>';
+    }
+  }
+  $('reviewList').innerHTML=h||'<p style="color:#888;font-size:.85em">✅ 暂无待审核</p>';
+  $('rvCount').textContent=cnt;
+}
+
+function doApprove(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    var t=S.tasks[i];
+    if(t.id===id&&t.st===2){
+      var total=t.p+t.bonus;
+      t.st=4;S.pts+=total;S.tp+=total;S.td++;S.exp+=total;
+      var day=tdy();
+      if(!S.cal[day])S.cal[day]={done:0,total:S.tasks.length,list:[]};
+      S.cal[day].done++;S.cal[day].list.push({n:t.n,p:total});
+      addHist(t.ic,'完成「'+t.n+'」',total);
+      checkLv();save();drawAll();
+      pop('✅','审核通过','「'+t.n+'」+'+total+'积分！');
+      return;
+    }
+  }
+}
+
+function doReject(id){
+  if(!S)return;
+  for(var i=0;i<S.tasks.length;i++){
+    if(S.tasks[i].id===id&&S.tasks[i].st===2){
+      S.tasks[i].st=3;save();drawTasks();drawReview();return;
+    }
+  }
+}
+
+// 日历
+function drawCal(){
+  if(!S)return;
+  $('calTitle').textContent=calY+'年'+(calM+1)+'月';
+  var first=new Date(calY,calM,1).getDay();
+  var days=new Date(calY,calM+1,0).getDate();
+  var prevD=new Date(calY,calM,0).getDate();
+  var todayStr=tdy(),h='';
+  for(var i=first-1;i>=0;i--)h+='<div class="dd other">'+(prevD-i)+'</div>';
+  for(var d=1;d<=days;d++){
+    var ds=calY+'-'+(calM+1)+'-'+d;
+    var info=S.cal[ds];
+    var dot='';
+    if(info&&info.done>0)dot='<span class="dot '+(info.done>=info.total?'g':'y')+'"></span>';
+    h+='<div class="dd'+(ds===todayStr?' today':'')+'" onclick="showDay(\''+ds+'\')">'+d+dot+'</div>';
+  }
+  var rem=(7-(first+days)%7)%7;
+  for(var i=1;i<=rem;i++)h+='<div class="dd other">'+i+'</div>';
+  $('calDays').innerHTML=h;
+}
+
+function showDay(ds){
+  if(!S)return;
+  var info=S.cal[ds],box=$('calDetail');
+  if(info&&info.list&&info.list.length>0){
+    var h='<b>📅 '+ds+'</b>';
+    for(var i=0;i<info.list.length;i++)h+='<div class="di"><span>✅ '+info.list[i].n+'</span><span>+'+info.list[i].p+'</span></div>';
+    box.innerHTML=h;
+  }else{
+    box.innerHTML='<b>📅 '+ds+'</b><br><span style="color:#888">无记录</span>';
+  }
+  box.style.display='block';
+}
+
+function calPrev(){calM--;if(calM<0){calM=11;calY--;}drawCal();}
+function calNext(){calM++;if(calM>11){calM=0;calY++;}drawCal();}
+
+// ========== 奖励（含删除功能） ==========
+function drawRewards(){
+  if(!S)return;
+  var h='';
+  for(var i=0;i<S.rwd.length;i++){
+    var r=S.rwd[i];
+    h+='<div class="card"><div class="top"><div class="ci">'+r.ic+'</div><div class="cf">';
+    h+='<div class="cn">'+r.n+'</div><div class="cp">🪙 '+r.c+'</div></div>';
+    h+='<button class="bsm br" onclick="doBuy('+r.id+')"'+(S.pts>=r.c?'':' disabled')+'>兑换</button>';
+    h+='<button class="rdel" onclick="delReward('+r.id+')">✕</button>';
+    h+='</div></div>';
+  }
+  $('rList').innerHTML=h||'<p style="text-align:center;color:#888;padding:20px">暂无奖励</p>';
+}
+
+function doBuy(id){
+  if(!S)return;
+  for(var i=0;i<S.rwd.length;i++){
+    var r=S.rwd[i];
+    if(r.id===id&&S.pts>=r.c){
+      S.pts-=r.c;S.tr++;
+      addHist(r.ic,'兑换「'+r.n+'」',-r.c);
+      save();drawAll();
+      pop(r.ic,'兑换成功','获得「'+r.n+'」！');
+      return;
+    }
+  }
+}
+
+function delReward(id){
+  if(!S)return;
+  var name='';
+  for(var i=0;i<S.rwd.length;i++)if(S.rwd[i].id===id)name=S.rwd[i].n;
+  if(!confirm('删除奖励「'+name+'」？'))return;
+  var arr=[];
+  for(var i=0;i<S.rwd.length;i++)if(S.rwd[i].id!==id)arr.push(S.rwd[i]);
+  S.rwd=arr;
+  save();drawRewards();
+  pop('🗑️','已删除','奖励「'+name+'」已删除');
+}
+
+function addReward(){
+  if(!S)return;
+  var n=$('nrN').value.replace(/^\s+|\s+$/g,'');
+  if(!n)return;
+  var c=parseInt($('nrC').value)||30;
+  var mx=0;for(var i=0;i<S.rwd.length;i++)if(S.rwd[i].id>mx)mx=S.rwd[i].id;
+  S.rwd.push({id:mx+1,n:n,c:c,ic:'🎁'});
+  $('nrN').value='';save();drawRewards();
+}
+
+// 家长
+function pinEnter(){
+  if(!S)return;
+  if($('pinInp').value===S.pin){
+    $('parentLock').style.display='none';
+    $('parentPanel').style.display='block';
+    drawReview();drawMgmt();
+  }else{$('pinErr').textContent='密码错误';}
+}
+
+function pinExit(){
+  $('parentLock').style.display='block';
+  $('parentPanel').style.display='none';
+  $('pinInp').value='';$('pinErr').textContent='';
+}
+
+function chgPin(){
+  if(!S)return;
+  var np=prompt('输入新密码(4-6位)：');
+  if(np&&np.length>=4){S.pin=np;save();pop('🔑','已修改','密码已更新');}
+}
+
+function addTask(){
+  if(!S)return;
+  var n=$('ntN').value.replace(/^\s+|\s+$/g,'');
+  if(!n){pop('⚠️','提示','请输入任务名称');return}
+  var d=$('ntD').value.replace(/^\s+|\s+$/g,'');
+  var p=parseInt($('ntP').value)||5;
+  var t=parseInt($('ntT').value)||30;
+  var ic=$('ntI').value;
+  var mx=0;for(var i=0;i<S.tasks.length;i++)if(S.tasks[i].id>mx)mx=S.tasks[i].id;
+  S.tasks.push({id:mx+1,n:n,d:d,p:p,ic:ic,tl:t,st:0,bonus:0,ts:0});
+  $('ntN').value='';$('ntD').value='';
+  save();drawTasks();drawMgmt();
+  pop('✅','已添加','「'+n+'」已添加');
+}
+
+function resetToday(){
+  if(!S)return;
+  if(!confirm('重置今日所有任务？'))return;
+  for(var i=0;i<S.tasks.length;i++){S.tasks[i].st=0;S.tasks[i].bonus=0;S.tasks[i].ts=0;}
+  save();drawAll();
+}
+
+function deleteAll(){
+  if(!confirm('⚠️ 清除所有数据？'))return;
+  localStorage.removeItem('pet4');
+  location.reload();
+}
+
+function switchTab(idx){
+  var btns=$('tabBtns').children,navs=$('bnav').children;
+  for(var i=0;i<4;i++){
+    btns[i].className=(i===idx)?'on':'';
+    navs[i].className='ni'+(i===idx?' on':'');
+    $('pnl'+i).className='pnl'+(i===idx?' show':'');
+  }
+}
+
+function checkLv(){
+  if(!S)return;
+  while(S.lv<8&&S.exp>=LVE[S.lv-1]){
+    S.lv++;
+    pop('🎊','升级！',PETS[S.pet].n+'→「'+LVTXT[S.lv-1]+'」');
+  }
+}
+
+function addHist(ic,tx,p){
+  if(!S)return;
+  var d=new Date();
+  S.hist.push({ic:ic,tx:tx,p:p,tm:(d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes())});
+  if(S.hist.length>100)S.hist=S.hist.slice(-100);
+}
+
+function pop(e,t,p){$('mE').textContent=e;$('mT').textContent=t;$('mP').textContent=p;$('mbg').className='mbg show';}
+function closeModal(){$('mbg').className='mbg';}
+
+// ========== 事件绑定 ==========
+$('goBtn').onclick=startGame;
+$('mBtn').onclick=closeModal;
+$('mbg').onclick=function(e){if(e.target===this)closeModal();};
+$('calPrev').onclick=calPrev;
+$('calNext').onclick=calNext;
+$('addRBtn').onclick=addReward;
+$('pinBtn').onclick=pinEnter;
+$('chgPinBtn').onclick=chgPin;
+$('rstBtn').onclick=resetToday;
+$('delBtn').onclick=deleteAll;
+$('exitPBtn').onclick=pinExit;
+$('addTBtn').onclick=addTask;
+
+// Tab切换
+var tabBtns=$('tabBtns').children;
+for(var i=0;i<tabBtns.length;i++){
+  (function(idx){
+    tabBtns[idx].onclick=function(){switchTab(idx)};
+  })(i);
+}
+
+// 底部导航
+var navItems=$('bnav').children;
+for(var i=0;i<navItems.length;i++){
+  (function(idx){
+    navItems[idx].onclick=function(){switchTab(idx)};
+  })(i);
+}
+
+// ========== 初始化 ==========
+buildGrid();
+
+// 尝试加载已有数据
+try{
+  var saved=localStorage.getItem('pet4');
+  if(saved){
+    var parsed=JSON.parse(saved);
+    var fixed=fixData(parsed);
+    if(fixed){
+      S=fixed;
+      enterMain();
+    }
+  }
+}catch(e){
+  console.error('加载数据失败:',e);
+}
+
+}catch(err){
+  console.error('初始化错误:',err);
+}
+</script>
+</body>
+</html>
