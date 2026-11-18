@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0a0e2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="星际自律学院">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<title>星际自律学院</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+<style>
+:root{
+  --bg:#0a0e2a; --bg2:#131845; --card:#1a2050; --card2:#232a66;
+  --line:rgba(255,255,255,.08);
+  --text:#eef0ff; --dim:#9aa3d0;
+  --purple:#8b7cf6; --blue:#5ac8fa; --orange:#ff9f43; --green:#4cd9a0; --red:#ff6b8a;
+  --gold:#ffd97a; --pink:#f9a8d4;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft Yahei",sans-serif;
+  background:radial-gradient(ellipse at top,var(--bg2) 0%,var(--bg) 70%);
+  color:var(--text);min-height:100vh;padding-bottom:260px;font-size:15px;
+  padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);
+}
+#starCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:16px 14px}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.topbar h1{font-size:18px;font-weight:700;letter-spacing:1px}
+.pill{background:rgba(139,124,246,.18);border:1px solid var(--purple);color:var(--purple);
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
+.pill.gold{background:rgba(255,217,122,.15);border-color:var(--gold);color:var(--gold)}
+
+.section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.section h2{font-size:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.section h2 .sub{font-size:11px;color:var(--dim);font-weight:400}
+
+.level-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.lv{background:var(--card2);border-radius:12px;padding:10px;border:1px solid var(--line);position:relative;cursor:pointer;transition:all .2s}
+.lv.current{border-color:var(--gold);background:rgba(255,217,122,.08);box-shadow:0 0 12px rgba(255,217,122,.2)}
+.lv .n{font-size:13px;font-weight:700}
+.lv .base{font-size:11px;color:var(--dim);margin-top:2px}
+.lv .tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:6px;
+  background:rgba(139,124,246,.2);color:var(--purple)}
+.lv.current .tag{background:rgba(255,217,122,.2);color:var(--gold)}
+
+.overview{background:linear-gradient(135deg,rgba(139,124,246,.15),rgba(90,200,250,.08));
+  border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.overview .stats{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.overview .s{font-size:11px;padding:4px 10px;border-radius:10px}
+.s.pending{background:rgba(154,163,208,.15);color:var(--dim)}
+.s.review{background:rgba(90,200,250,.15);color:var(--blue)}
+.s.done{background:rgba(76,217,160,.15);color:var(--green)}
+.progress{height:8px;background:rgba(0,0,0,.3);border-radius:5px;overflow:hidden;margin:8px 0}
+.progress .fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));transition:width .5s}
+.overview .row{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:10px}
+.cta{display:flex;gap:8px}
+.cta button{flex:1;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+.cta .primary{background:linear-gradient(135deg,var(--purple),#6c5ce7);color:#fff}
+.cta .orange{background:linear-gradient(135deg,var(--orange),#ff7b3a);color:#fff}
+.cta .ghost{background:rgba(255,255,255,.08);color:var(--text)}
+
+.fact{font-size:12px;color:var(--dim);line-height:1.7;font-style:italic}
+
+/* 惊喜宝箱 */
+.mystery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mystery{background:var(--card2);border-radius:12px;padding:10px;text-align:center;
+  border:1px solid var(--line);position:relative}
+.mystery.locked{opacity:.5;filter:grayscale(.6)}
+.mystery.unlocked{border-color:var(--gold);background:rgba(255,217,122,.08)}
+.mystery .ic{font-size:28px}
+.mystery .nm{font-size:11px;margin-top:4px}
+.mystery .need{font-size:9px;color:var(--dim);margin-top:2px}
+
+.task{background:var(--card2);border-radius:14px;padding:12px;margin-bottom:10px;border-left:3px solid var(--purple)}
+.task.running{border-left-color:var(--orange);background:rgba(255,159,67,.08)}
+.task.done{border-left-color:var(--green);opacity:.7}
+.task .name{font-size:14px;font-weight:600}
+.task .meta{font-size:11px;color:var(--dim);margin-top:3px}
+.task .reward{font-size:11px;color:var(--gold);margin-top:4px}
+.task .timer{font-size:24px;font-weight:700;color:var(--orange);font-variant-numeric:tabular-nums;margin:6px 0}
+.task .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+.btn{border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;
+  background:var(--purple);color:#fff;min-height:44px}
+.btn.ok{background:var(--green)} .btn.warn{background:var(--red)} .btn.ghost{background:rgba(255,255,255,.1)}
+.btn.small{padding:6px 10px;font-size:12px;min-height:36px}
+.btn.mic{background:rgba(90,200,250,.2);color:var(--blue);min-width:44px}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--orange));color:#332}
+
+input,select,textarea{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);
+  background:rgba(0,0,0,.25);color:var(--text);font-size:16px;margin:6px 0}
+input:focus{outline:1px solid var(--purple)}
+label{font-size:12px;color:var(--dim);display:block;margin-top:8px}
+
+.view{display:none} .view.active{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+@keyframes orbitSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:10;
+  background:rgba(10,14,42,.95);backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.tabbar button{background:none;border:none;color:var(--dim);font-size:10px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:48px;min-height:48px}
+.tabbar button .ic{font-size:20px}
+.tabbar button.active{color:var(--gold)}
+
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;
+  background:rgba(0,0,0,.9);padding:12px 20px;border-radius:12px;font-size:14px;
+  border:1px solid var(--gold);opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+
+.phone-status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.phone-status .cell{background:rgba(0,0,0,.25);border-radius:12px;padding:10px;text-align:center}
+.phone-status .num{font-size:18px;font-weight:700;color:var(--gold)}
+.phone-status .lbl{font-size:10px;color:var(--dim);margin-top:2px}
+
+.agreement-text{font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap}
+.sign-row{display:flex;gap:10px;margin-top:16px}
+.sign-row .cell{flex:1;background:rgba(0,0,0,.2);border-radius:10px;padding:10px;text-align:center}
+.sign-row .name{font-size:11px;color:var(--dim)}
+.sign-row .date{font-size:13px;margin-top:4px}
+
+.cat{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.cat button{padding:8px 12px;border-radius:20px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);color:var(--dim);font-size:12px;cursor:pointer}
+.cat button.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+
+/* 密码弹窗 */
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;
+  align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+  width:100%;max-width:340px}
+.modal h3{font-size:16px;margin-bottom:12px;text-align:center}
+
+/* 抽奖转盘 */
+.lottery-box{text-align:center;padding:20px 0}
+.lottery-wheel{width:160px;height:160px;border-radius:50%;margin:0 auto;
+  background:conic-gradient(var(--purple) 0 60deg,var(--gold) 60deg 120deg,var(--blue) 120deg 180deg,
+  var(--green) 180deg 240deg,var(--orange) 240deg 300deg,var(--pink) 300deg 360deg);
+  display:flex;align-items:center;justify-content:center;position:relative;
+  transition:transform 3s cubic-bezier(.2,.8,.3,1);box-shadow:0 0 30px rgba(255,217,122,.3)}
+.lottery-center{width:60px;height:60px;border-radius:50%;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
+.lottery-pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;
+  border-bottom:14px solid var(--gold)}
+
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  #starCanvas,.tabbar,.app > *{display:none !important}
+  #printView{display:block !important;color:#000}
+}
+</style>
+</head>
+<body>
+<canvas id="starCanvas"></canvas>
+<div id="toast"></div>
+
+<div class="app">
+  <div class="topbar">
+    <h1>🚀 星际自律学院</h1>
+    <span class="pill gold" id="topCoin">⭐ 0</span>
+  </div>
+
+  <!-- ===== 首页 ===== -->
+  <div class="view active" id="view-home">
+    <div class="section" style="background:linear-gradient(135deg,rgba(139,124,246,.25),rgba(90,200,250,.15));display:flex;align-items:center;gap:12px">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8b7cf6,#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;cursor:pointer" onclick="pickAvatar()" id="homeAvatar">👨‍🚀</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:17px;font-weight:700" id="homeUserName" onclick="editUserName()">小宇航员 ✏️</div>
+        <div style="font-size:12px;color:var(--dim);margin-top:2px" id="homeLevelTxt">Lv.1 星际学员</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:var(--gold)" id="homeCoin">0</div>
+        <div style="font-size:10px;color:var(--dim)">积分</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:var(--blue)" id="homeExp">0</div>
+        <div style="font-size:10px;color:var(--dim)">经验</div>
+      </div>
+      <button onclick="openAdmin()" style="background:none;border:none;color:var(--dim);font-size:20px;cursor:pointer;padding:4px">⚙️</button>
+    </div>
+    <div class="section" style="background:linear-gradient(135deg,rgba(255,217,122,.15),rgba(139,124,246,.1))">
+      <p style="font-size:14px;font-weight:600;color:var(--gold);text-align:center;line-height:1.7" id="dailyQuote"></p>
+    </div>
+    <div class="section">
+      <h2 onclick="toggleSection('levelGridWrap')" style="cursor:pointer">星际军衔 <span class="sub" id="levelGridWrapArrow">点击展开 ▾</span> <span class="sub" id="expTxt">经验 0</span></h2>
+      <div id="levelGridWrap" style="display:none"><div class="level-grid" id="levelGrid"></div></div>
+    </div>
+
+    <div class="section">
+      <h2>🌌 我的宇宙 <span class="sub">星球在轨道上运行</span></h2>
+      <div id="orbitWrap" style="position:relative;height:260px;background:radial-gradient(circle at center,#0a0e2a,#050818);border-radius:14px;overflow:hidden">
+        <div id="sun" style="position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;
+          background:radial-gradient(circle at 35% 35%,#fff,#ffd97a 40%,#ff9f43);
+          box-shadow:0 0 25px #ffd97a,0 0 50px #ff9f4366"></div>
+        <div id="orbitLayer" style="position:absolute;inset:0"></div>
+      </div>
+      <p style="font-size:11px;color:var(--dim);margin-top:8px;text-align:center">
+        💡 完成任务=守护星球；连续完成，星球会越来越亮
+      </p>
+    </div>
+
+    <div class="overview">
+      <h2 style="margin-bottom:8px">今日任务概览</h2>
+      <div class="stats">
+        <span class="s pending">待完成 <b id="sPending">0</b></span>
+        <span class="s review">进行中 <b id="sRunning">0</b></span>
+        <span class="s done">已完成 <b id="sDone">0</b></span>
+      </div>
+      <div class="row"><span>今日积分 <b id="todayCoinTxt" style="color:var(--gold)">0</b> / <span id="dailyCapTxt">20</span>（上限后只加经验）</span></div>
+      <div class="row"><span>今日完成度</span><span id="pctTxt">0%</span></div>
+      <div class="progress"><div class="fill" id="pctFill" style="width:0%"></div></div>
+      <div class="cta" style="margin-top:12px">
+        <button class="primary" onclick="switchTab('task')">📋 打卡</button>
+        <button class="orange" onclick="switchTab('shop')">🎁 兑换</button>
+        <button class="ghost" onclick="switchTab('agree')">📜 约定</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>今日星球情报</h2>
+      <p class="fact" id="factTxt"></p>
+    </div>
+
+    <div class="section">
+      <h2>🏅 我的荣誉 <span class="sub" id="badgeCountTxt">0 枚</span></h2>
+      <div id="badgePreview" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="switchTab('badge')">查看完整荣誉墙 →</button>
+    </div>
+
+    <div class="section">
+      <h2>🎁 神秘舱 <span class="sub" id="mysteryHint">升级解锁更多惊喜</span></h2>
+      <div class="mystery-grid" id="mysteryGrid"></div>
+      <div style="margin-top:12px;padding:10px;background:rgba(0,0,0,.2);border-radius:10px;font-size:11px;color:var(--dim);line-height:1.7">
+        <b style="color:var(--gold);cursor:pointer" onclick="toggleSection('mysteryHelp')">📖 怎么解锁新惊喜？ ▾</b>
+        <div id="mysteryHelp" style="display:none;margin-top:6px">
+          完成任务获得两种奖励：<br>
+          ⭐ <b>积分</b>（兑换商品用）：按难度 1-5 星，每日上限 20 分<br>
+          📈 <b>经验值</b>（解锁星球用）：约为积分的一半，涨得慢<br>
+          累计经验升级：Lv2 需 30 → Lv3 需 80 → Lv4 需 160 → Lv5 需 280 → Lv6 需 450 → Lv7 需 650 → Lv8 需 900 → Lv9 需 1200 → Lv10 需 1600 → Lv11 需 2000 → Lv12 需 2500
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 任务 ===== -->
+  <div class="view" id="view-task">
+    <div class="section">
+      <h2>添加今日任务</h2>
+      <label>任务分类</label>
+      <select id="fCategory">
+        <option value="life">🏠 生活习惯（日常/家务/运动）— 1-2 星</option>
+        <option value="study" selected>📚 学习习惯（作业/练琴/阅读/预习）— 3-5 星</option>
+      </select>
+      <label>科目</label>
+      <select id="fSubject">
+        <option>数学</option><option>语文</option><option>英语</option>
+        <option>道德与法治</option><option>科学</option><option>历史</option>
+        <option>阅读</option><option>锻炼</option><option>练琴</option><option>画画</option><option>家务</option><option>其他</option>
+      </select>
+      <label>内容</label>
+      <div style="display:flex;gap:6px">
+        <input id="fContent" placeholder="例如：写完数学练习册第12页" style="flex:1">
+        <button class="btn mic" onclick="startVoice()">🎤</button>
+      </div>
+      <label>难度（1-5 星）</label>
+      <select id="fDifficulty">
+        <option value="1">⭐ 1 星（生活小事）</option>
+        <option value="2">⭐⭐ 2 星（家务/运动）</option>
+        <option value="3" selected>⭐⭐⭐ 3 星（常规作业/练习）</option>
+        <option value="4">⭐⭐⭐⭐ 4 星（预习/错题/深度阅读）</option>
+        <option value="5">⭐⭐⭐⭐⭐ 5 星（挑战/自主复习）</option>
+      </select>
+      <label>预计用时（分钟）</label>
+      <input id="fMinutes" type="number" min="5" max="180" value="30">
+      <button class="btn" style="width:100%;margin-top:10px" onclick="addTask()">＋ 添加任务</button>
+      <p style="font-size:11px;color:var(--dim);margin-top:6px">💡 添加后可以用上下箭头调整顺序，从最重要的开始做</p>
+    </div>
+    <div class="section">
+      <h2>我的任务 <span class="sub" id="taskDate"></span></h2>
+      <div id="taskList"></div>
+    </div>
+  </div>
+
+  <!-- ===== 兑换 ===== -->
+  <div class="view" id="view-shop">
+    <div class="section">
+      <h2>星光兑换商店 <span class="sub">家长和孩子共同商定</span></h2>
+      <div id="shopList"></div>
+    </div>
+    <div class="section">
+      <h2>我的心愿单</h2>
+      <div style="display:flex;gap:6px">
+        <input id="wishInput" placeholder="写下想要的奖励" style="flex:1">
+        <button class="btn small" onclick="addWish()">添加</button>
+      </div>
+      <div id="wishList" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- ===== 手机 ===== -->
+  <div class="view" id="view-phone">
+    <div class="section">
+      <h2>📱 手机管理舱</h2>
+      <div class="phone-status">
+        <div class="cell"><div class="num" id="pFree">15</div><div class="lbl">今日免费(分)</div></div>
+        <div class="cell"><div class="num" id="pUsed">0</div><div class="lbl">已使用(分)</div></div>
+        <div class="cell"><div class="num" id="pAvail">0</div><div class="lbl">积存(分)</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--dim);line-height:1.7;margin-bottom:10px">
+        想多用手机？写一份使用计划，告诉爸爸妈妈你为什么需要、怎么用。<br>
+        <span id="applyHint" style="color:var(--gold)"></span>
+      </p>
+      <label>使用理由</label>
+      <textarea id="pReason" rows="2" placeholder="例如：想查一下数学错题的讲解视频，20分钟就好"></textarea>
+      <label>申请时长（分钟）</label>
+      <input id="pMinutes" type="number" min="5" max="120" value="20">
+      <button class="btn" style="width:100%;margin-top:10px" onclick="submitPhone()">提交申请</button>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)">
+        <p style="font-size:12px;color:var(--dim);margin-bottom:6px">今天的免费时间用完了吗？</p>
+        <button class="btn ghost" style="width:100%" onclick="freeUsedToday()">✓ 今天的免费时间已用完</button>
+      </div>
+      <div style="margin-top:10px;padding:10px;background:linear-gradient(135deg,rgba(76,217,160,.15),rgba(90,200,250,.1));border-radius:10px">
+        <p style="font-size:13px;color:var(--green);font-weight:600;margin-bottom:6px">🌙 按时放下手机挑战</p>
+        <p style="font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:8px">在约定时间（如21:00）前主动放下手机，点下面按钮打卡，可获得守时星和克制勋章</p>
+        <button class="btn ok" style="width:100%" onclick="putDownPhone()">🌙 我已按时放下手机</button>
+      </div>
+    </div>
+    <div class="section">
+      <h2>申请记录</h2>
+      <div id="phoneRequests"></div>
+    </div>
+  </div>
+
+  <!-- ===== 约定 ===== -->
+  <div class="view" id="view-agree">
+    <div class="section">
+      <h2>📜 亲子自律协议 <span class="sub" id="agreeEditBtn" style="cursor:pointer;color:var(--blue)">✏️ 编辑</span></h2>
+      <div id="agreeView">
+        <div class="agreement-text" id="agreementText"></div>
+      </div>
+      <div id="agreeEdit" style="display:none">
+        <textarea id="agreementEdit" rows="14" style="font-size:13px"></textarea>
+        <button class="btn ok" style="width:100%;margin-top:8px" onclick="saveAgreement()">保存协议</button>
+      </div>
+      <div class="sign-row">
+        <div class="cell"><div class="name">孩子签名</div><div class="date" id="signChild">—</div>
+          <button class="btn ok small" style="margin-top:6px" onclick="openSign('child')">✍️ 签名</button>
+        </div>
+        <div class="cell"><div class="name">家长签名</div><div class="date" id="signParent">—</div>
+          <button class="btn ok small" style="margin-top:6px" onclick="openSign('parent')">✍️ 签名</button>
+        </div>
+      </div>
+      <button class="btn ghost" style="width:100%;margin-top:12px" onclick="window.print()">🖨️ 打印协议</button>
+    </div>
+  </div>
+
+  <!-- ===== 提案 ===== -->
+  <div class="view" id="view-prop">
+    <div class="section">
+      <h2>💡 给爸爸妈妈的提案</h2>
+      <div class="cat" id="catBar">
+        <button data-cat="学习任务" class="active">📚 学习任务</button>
+        <button data-cat="生活习惯">🏠 生活习惯</button>
+        <button data-cat="娱乐奖励">🎮 娱乐奖励</button>
+        <button data-cat="家务分工">🧹 家务分工</button>
+        <button data-cat="其他">✨ 其他</button>
+      </div>
+      <label>你的提案</label>
+      <textarea id="propText" rows="3" placeholder="写清楚：你想改变什么？为什么？怎么做？"></textarea>
+      <button class="btn" style="width:100%" onclick="submitProposal()">提交提案</button>
+      <div id="propRemind" style="font-size:12px;color:var(--gold);margin-top:8px;display:none">
+        💡 写完后，要不要找个合适的时间和爸爸妈妈聊聊？
+      </div>
+    </div>
+    <div class="section">
+      <h2>提案记录</h2>
+      <div id="propList"></div>
+    </div>
+  </div>
+
+  <!-- ===== 视图：日历 ===== -->
+  <div class="view" id="view-cal">
+    <div class="section">
+      <h2>📅 历史日历</h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <button class="btn ghost small" onclick="changeMonth(-1)">← 上月</button>
+        <span id="calMonthLabel" style="font-size:14px;font-weight:600"></span>
+        <button class="btn ghost small" onclick="changeMonth(1)">下月</button>
+      </div>
+      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center"></div>
+    </div>
+    <div class="section" id="calDetail" style="display:none">
+      <h3 id="calDetailTitle" style="margin-bottom:10px"></h3>
+      <div id="calDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- ===== 荣誉墙 ===== -->
+  <div class="view" id="view-badge">
+    <div class="section">
+      <h2>🏅 荣誉墙</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:12px">达成目标自动获得勋章，每枚勋章都有奖励积分</p>
+      <div id="badgeList"></div>
+    </div>
+    <div class="section">
+      <h2 onclick="toggleSection('badgeRules')" style="cursor:pointer">📜 勋章规则 <span class="sub" id="badgeRulesArrow">点击展开 ▾</span></h2>
+      <div id="badgeRules" style="display:none">
+        <div style="font-size:12px;color:var(--dim);line-height:1.9">
+          🛡️ <b>克制勋章</b>：当天不申请额外手机时间 → +5 积分<br>
+          ⏰ <b>守时星</b>：提前完成任意任务 → +3 积分<br>
+          📚 <b>阅读之星</b>：连续 7 天完成阅读任务 → +10 积分<br>
+          💪 <b>运动达人</b>：连续 7 天完成运动任务 → +10 积分<br>
+          🌟 <b>自律之星</b>：一天全部任务按时完成 → +5 积分<br>
+          🔥 <b>连续之星</b>：连续 7 天完成所有任务 → +15 积分<br>
+          🤝 <b>诚实勋章</b>：主动承认错误 → +5 积分<br>
+          🌙 <b>早睡之星</b>：连续 7 天记录睡前流程 → +8 积分<br>
+          <span style="color:var(--gold)">等级：铜(1次)→银(3次)→金(5次)→铂金(10次)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 家长 ===== -->
+  <div class="view" id="view-admin">
+    <div class="section">
+      <h2>🔧 家长管理</h2>
+      <label>每日免费手机时间（分钟）</label>
+      <input id="setFreeMin" type="number" min="0" max="120" value="15">
+      <button class="btn" onclick="setFreeMin()">保存手机设置</button>
+      <label>每星积分（1-5星任务对应积分，默认1）</label>
+      <input id="setPerStar" type="number" min="1" max="5" value="1">
+      <button class="btn" onclick="setPerStar()">保存积分设置</button>
+      <label style="margin-top:10px">每日积分上限（超过后只加经验，默认20）</label>
+      <input id="setDailyCap" type="number" min="5" max="100" value="20">
+      <button class="btn" onclick="setDailyCap()">保存上限</button>
+      <label style="margin-top:10px">修改星光币</label>
+      <input id="setCoin" type="number">
+      <label>修改经验</label>
+      <input id="setExp" type="number">
+      <button class="btn" onclick="setCoinExp()">保存调整</button>
+    </div>
+    <div class="section">
+      <h2>📋 每日固定任务管理</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:8px">每天自动出现的任务，家长可增删改。</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <input id="ftName" placeholder="任务名称" style="flex:2">
+        <select id="ftCat" style="flex:1">
+          <option>学习</option><option>生活</option>
+        </select>
+        <select id="ftDiff" style="flex:1">
+          <option value="1">1星</option><option value="2">2星</option>
+          <option value="3" selected>3星</option><option value="4">4星</option><option value="5">5星</option>
+        </select>
+        <input id="ftDuration" type="number" placeholder="时长(分)" value="20" min="5" max="120" style="flex:1">
+      </div>
+      <button class="btn" style="width:100%;margin-top:6px" onclick="addFixedTask()">＋ 添加固定任务</button>
+      <div id="fixedTaskList" style="margin-top:10px"></div>
+    </div>
+    <div class="section">
+      <h2>🏅 自定义勋章管理</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:8px">家长可添加自定义表彰，如"主动洗碗勋章"等</p>
+      <button class="btn" style="width:100%" onclick="addCustomBadge()">＋ 添加自定义勋章</button>
+      <p style="font-size:11px;color:var(--dim);margin-top:8px">勋章等级：铜(1次)→银(3次)→金(5次)→铂金(10次)，升级额外奖励双倍积分</p>
+    </div>
+    <div class="section">
+      <h2>自定义兑换项目</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:8px">和孩子商量后添加，立即显示在商店。</p>
+      <div style="display:flex;gap:6px">
+        <input id="shopName" placeholder="项目名称" style="flex:2">
+        <input id="shopCost" type="number" placeholder="积分" style="flex:1">
+      </div>
+      <button class="btn" style="width:100%;margin-top:6px" onclick="addShopItem()">＋ 添加兑换项</button>
+      <div id="adminShopList" style="margin-top:10px"></div>
+    </div>
+    <div class="section">
+      <h2>审批手机申请</h2>
+      <div id="adminPhone"></div>
+    </div>
+    <div class="section">
+      <h2>审批提案</h2>
+      <div id="adminProp"></div>
+    </div>
+    <div class="section">
+      <h2>任务管理</h2>
+      <div id="adminTasks"></div>
+      <button class="btn warn" style="width:100%;margin-top:8px" onclick="resetToday()">重置今日任务</button>
+    </div>
+    <div class="section">
+      <h2>协议签署 & 密码</h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:10px">签名请到「约定」页面操作</p>
+      <label>修改家长密码（4位数字）</label>
+      <input id="newPwd" type="password" maxlength="4" placeholder="输入新密码">
+      <button class="btn" onclick="changePwd()">修改密码</button>
+      <button class="btn ghost" style="margin-top:6px" onclick="exportData()">导出数据</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 签名弹窗 ===== -->
+<div class="modal-mask" id="signModal" style="display:none">
+  <div class="modal">
+    <h3 id="signTitle">✍️ 签名</h3>
+    <p style="font-size:12px;color:var(--dim);text-align:center;margin-bottom:10px">在下面框里用手指签名</p>
+    <canvas id="signCanvas" width="300" height="150" style="background:#fff;border-radius:10px;touch-action:none;display:block;margin:0 auto"></canvas>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="btn ghost" style="flex:1" onclick="clearSign()">清除</button>
+      <button class="btn" style="flex:1" onclick="saveSign()">保存签名</button>
+      <button class="btn ghost" style="flex:1" onclick="closeSign()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 打印视图 ===== -->
+<div id="printView" style="display:none;padding:20px;color:#000">
+  <h1 style="text-align:center">亲子自律协议</h1>
+  <div id="printAgreement" style="white-space:pre-wrap;margin:20px 0;font-size:14px;line-height:2"></div>
+  <p>孩子签名：________________　日期：________________</p>
+  <p style="margin-top:10px">家长签名：________________　日期：________________</p>
+</div>
+
+<!-- ===== Tabbar ===== -->
+<div class="tabbar">
+  <button data-v="home" class="active"><span class="ic">🌌</span>首页</button>
+  <button data-v="task"><span class="ic">📋</span>任务</button>
+  <button data-v="shop"><span class="ic">🎁</span>兑换</button>
+  <button data-v="badge"><span class="ic">🏅</span>荣誉</button>
+  <button data-v="phone"><span class="ic">📱</span>手机</button>
+  <button data-v="agree"><span class="ic">📜</span>约定</button>
+  <button data-v="prop"><span class="ic">💡</span>提案</button>
+  <button data-v="cal"><span class="ic">📅</span>日历</button>
+</div>
+
+<!-- ===== 密码弹窗 ===== -->
+<div class="modal-mask" id="pwdModal" style="display:none">
+  <div class="modal">
+    <h3>🔒 家长验证</h3>
+    <p style="font-size:12px;color:var(--dim);text-align:center;margin-bottom:10px">请输入家长密码</p>
+    <input type="password" id="pwdInput" maxlength="4" inputmode="numeric" style="text-align:center;font-size:20px;letter-spacing:8px">
+    <button class="btn" style="width:100%;margin-top:10px" onclick="checkPwd()">进入</button>
+    <button class="btn ghost" style="width:100%;margin-top:6px" onclick="closePwd()">取消</button>
+    <p style="font-size:11px;color:var(--dim);text-align:center;margin-top:8px">初始密码：8888</p>
+  </div>
+</div>
+
+<!-- ===== 抽奖弹窗 ===== -->
+<div class="modal-mask" id="lotteryModal" style="display:none">
+  <div class="modal">
+    <h3>🎰 每日幸运转盘</h3>
+    <div class="lottery-box">
+      <div class="lottery-wheel" id="wheel">
+        <div class="lottery-pointer"></div>
+        <div class="lottery-center" onclick="spinWheel()">GO</div>
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin-top:14px" id="lotteryTip">今天还没抽奖，点 GO 试试手气</p>
+    </div>
+    <button class="btn ghost" style="width:100%" onclick="closeLottery()">关闭</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   配置
+============================================================ */
+const LEVELS = [
+  {n:"星际新手",base:"地球基地",need:0},
+  {n:"星际见习生",base:"地球基地",need:30},
+  {n:"星球探索者",base:"月海营地",need:80},
+  {n:"星球拓荒者",base:"月海营地",need:160},
+  {n:"星云航行者",base:"火星驿站",need:280},
+  {n:"星云领航员",base:"火星驿站",need:450},
+  {n:"银河冒险家",base:"木星云港",need:650},
+  {n:"银河护卫者",base:"木星云港",need:900},
+  {n:"星系开拓官",base:"土星光环",need:1200},
+  {n:"星系执政官",base:"土星光环",need:1600},
+  {n:"宇宙远征司令",base:"深蓝海王星",need:2000},
+  {n:"宇宙指挥官",base:"银河总部",need:2500}
+];
+
+// 每级解锁的惊喜
+const MYSTERIES = [
+  {lv:1, ic:"🌱", nm:"起步礼包", need:"Lv1"},
+  {lv:2, ic:"🎰", nm:"每日抽奖", need:"Lv2"},
+  {lv:3, ic:"🏆", nm:"成就墙", need:"Lv3"},
+  {lv:4, ic:"🎨", nm:"主题色", need:"Lv4"},
+  {lv:5, ic:"📌", nm:"心愿置顶", need:"Lv5"},
+  {lv:6, ic:"📅", nm:"自主规划日", need:"Lv6"},
+  {lv:7, ic:"🎁", nm:"每周宝箱", need:"Lv7"},
+  {lv:8, ic:"🐾", nm:"精灵装扮", need:"Lv8"},
+  {lv:9, ic:"✏️", nm:"星球命名权", need:"Lv9"},
+  {lv:10, ic:"👥", nm:"好友同行", need:"Lv10"},
+  {lv:11, ic:"📜", nm:"协议修改权", need:"Lv11"},
+  {lv:12, ic:"👑", nm:"传奇称号", need:"Lv12"}
+];
+
+const DEFAULT_SHOP = [
+  {name:"选今晚菜品",cost:5},
+  {name:"额外睡前故事",cost:5},
+  {name:"手机 30 分钟",cost:20,phone:30},
+  {name:"手机 60 分钟",cost:35,phone:60},
+  {name:"甜品一份",cost:15},
+  {name:"周末晚睡半小时",cost:25},
+  {name:"公园出游半天",cost:50},
+  {name:"邀请朋友到家",cost:80},
+  {name:"心愿大奖",cost:120}
+];
+
+const FACTS = [
+  "国际空间站每 90 分钟绕地球一圈，宇航员一天能看到十六次日出。",
+  "金星上的一天比一年还长——它自转得比公转还慢。",
+  "在太空中，你的身高会变高 5 厘米左右。",
+  "一茶匙中子星的物质，重量相当于全世界的人加起来。",
+  "哈勃望远镜看到的宇宙深处，光走了 130 亿年才到达我们眼睛。",
+  "月球正在以每年 3.8 厘米的速度远离地球。",
+  "宇航员在太空不能哭，因为没有重力，眼泪不会掉下来。",
+  "火星上的奥林帕斯山是太阳系最高的山，是珠峰的 2.5 倍。",
+  "如果能把土星放进水里，它会浮起来——它比水还轻。",
+  "旅行者 1 号已经飞了 40 多年，现在还在向地球发信号。"
+];
+
+const QUOTES = [
+  "今天的每一次专注，都是在给未来的自己攒星光 ✨",
+  "你不需要很厉害才能开始，你开始了才会很厉害 🚀",
+  "自律不是苦行，是让未来的你感谢现在的自己 🌠",
+  "小步坚持，比偶尔爆发更有力量 🌱",
+  "把\"要我做\"变成\"我要做\"，你就是自己的指挥官 ⭐",
+  "今天的你，比昨天多掌握了一点点 🌌",
+  "慢慢来，比较快；稳稳走，比较远 🌍",
+  "任务做完那一刻的轻松，是世界上最棒的感觉 🎯",
+  "你管理的不是时间，是你自己的人生 ⏱️",
+  "每一个伟大的探险家，都是从第一步开始的 🗺️",
+  "手机等你完成任务后还在那里，但时间过去了就不会回来 📱",
+  "今天的努力，是未来你回忆时的微笑 🌟"
+];
+
+const PLANET_COLORS = ["#ff9f43","#5ac8fa","#4cd9a0","#f9a8d4","#a78bfa","#ffd97a","#ff6b8a","#6ee7b7","#5ac8fa","#c084fc","#fb923c","#f472b6"];
+
+const DEFAULT_AGREEMENT = `【一、我是自己的主人】
+1. 上学期间早上 6:50 起床，自己洗漱、整理床铺，不叫第二遍。
+2. 晚上 9:30 上床，10:00 前关灯，睡前不碰手机。
+3. 周末或节假日起床不晚于 8:30，睡觉不晚于 10:30。
+4. 每天户外活动或运动不少于 20 分钟（摸高/跳绳/跑步/打球均可）。
+5. 课间走出教室，看远处放松眼睛，保护眼睛，从我做起。
+
+【二、时间是我的朋友】
+1. 回家先列今日任务清单，再开始做。
+2. 作业自己安排顺序，不边写边玩、不边写边问。
+3. 遇到不会的题，先思考 5 分钟，再翻书，还是没思路就画圈跳过，最后集中问。
+4. 错题当天订正，抄到错题本上或用学练机收集，周末复习一次。
+5. 每天阅读 20 分钟，读完说一句收获。
+6. 每天记单词 5个，按照艾宾浩斯记忆法进行复习。
+7. 预习第二天要学的内容，标记不懂的地方。
+8. 周末坚持早读15分钟左右（语文/英语）
+9.考试前自己整理复习提纲，不等家长催，如有不懂或有困难，家长可以给予帮助。
+
+【三、手机与电子设备】
+1. 上学期间免费手机时间 15 分钟，周末或节假日免费手机时间30分钟，当天用不完不累计。
+2. 额外时间需要写申请，说明理由和时长，家长 10 分钟内答复，拒绝须讲理由。家长批准后才可用，上学期间每天可以申请一次，每次20分钟内；周末或节假日每天可以申请三次，每次20分钟内。
+3. 吃饭时、做作业时、家长说话时不看手机。
+4. 吃饭前或做完作业后使用手机。
+5. 21:30 后不碰手机。
+6. 主动不看手机的日子，记一天"克制勋章"。
+7.不充值打赏网购、不下载新 App、不点陌生链接、不加陌生人、不外发隐私信息。 遇骚扰/诈骗/欺凌/不适内容，立刻告诉家长——主动说就不没收、不追责（此条优先于一切）。
+
+【四、生活自理】
+1. 自己整理书包，前一天晚上准备好第二天的东西。
+2. 书桌保持整洁，做完作业收拾干净。
+3. 自己的房间每周整理一次，垃圾不倒地上。
+4. 饭后收自己的碗筷，每周至少做 2 次家务（扫地/擦桌/洗碗）。
+5. 穿什么衣服、带什么东西，自己提前准备，不等人提醒。
+6. 自己洗澡、洗内衣袜子，力所能及的事不找家长。
+
+【五、情绪与沟通】
+1. 有不高兴可以说，不摔东西、不甩门、不冷战。
+2. 做错了勇于承认，撒谎比错误本身更严重。
+3. 跟家长有不同意见，好好说，不说"你们都不懂"。
+4. 不跟同学比吃穿、比手机，跟自己比进步，每天进步一点点，相信自己是最优秀的。
+5. 乐于积极跟家长分享自己每天的情绪，如每天说一件今天做得好的事或不开心的事等。
+
+【六、家长的承诺】
+1. 不吼不叫，提醒不超过两次，第三次用平静的方式说。
+2. 不随便扣积分，积分规则双方同意后才执行。
+3. 认真读孩子的提案，每周日晚上一起聊 10 分钟。
+4. 先夸进步，再聊问题，不拿孩子跟别人比。
+5. 答应的兑换一定兑现，不耍赖。
+6. 家长自己也不在孩子面前长时间刷手机，禁止在孩子做作业期间刷手机。
+
+【七、积分与奖励规则】
+1. 完成一个任务 = 按难度给积分（1-5 星）。
+2. 每天积分上限 20 分，超过后只加经验不加积分。
+3. 经验值约为积分的一半，用于升级解锁星球。
+4. 积分可以兑换商店里的奖励，也可以存着换大奖。
+5. 连续 7 天完成任务，额外奖励 10 分。
+6. 连续 3 天被催促，扣 5 分（但不扣经验）。
+
+【八、我们的约定】
+1. 每周日晚上一起复盘：本周哪里好、哪里要改。
+2. 协议可以每月 1 号更新一次，根据实际情况调整。
+3. 谁违反了自己的承诺，都要接受约定的后果。
+4. 这不是考试，是练习做自己的指挥官。`;
+
+/* ============================================================
+   状态
+============================================================ */
+const DEFAULT = {
+  userName:"小宇航员",
+  avatar:"👨‍🚀",
+  coin:0, exp:0,
+  dateStr:"", tasks:[],
+  phone:{free:15, freeSetting:15, used:0, avail:0, requests:[]},
+  wishes:[], proposals:[],
+  shop:JSON.parse(JSON.stringify(DEFAULT_SHOP)),
+  agreement:DEFAULT_AGREEMENT,
+  signChild:"", signParent:"",
+  adminPwd:"8888",
+  perStar:1,
+  dailyCap:20,
+  todayCoin:0,
+  lottery:{lastDraw:"", history:[]},
+  weekBox:{lastOpen:""},
+  planets:[],
+  discovered:[],
+  badges:[],  // [{id, name, icon, desc, date}]
+  history:{},
+  fixedTasks:[
+    {id:1, name:"阅读", cat:"学习", difficulty:3, duration:20, enabled:true},
+    {id:2, name:"记单词", cat:"学习", difficulty:2, duration:15, enabled:true},
+    {id:3, name:"运动/锻炼", cat:"生活", difficulty:2, duration:30, enabled:true},
+    {id:4, name:"整理书包书桌", cat:"生活", difficulty:1, duration:10, enabled:true},
+    {id:5, name:"睡前流程", cat:"生活", difficulty:1, duration:15, enabled:true}
+  ]
+};
+let D = load();
+let activeCat = "学习任务";
+let pendingTab = null;
+
+function load(){
+  try{
+    const raw = localStorage.getItem("starAcademyV2");
+    if(raw) return Object.assign({}, DEFAULT, JSON.parse(raw));
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){localStorage.setItem("starAcademyV2",JSON.stringify(D))}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function ensureToday(){
+  const t = todayStr();
+  if(D.dateStr !== t){
+    // 归档昨天
+    if(D.dateStr && D.tasks.length){
+      D.history[D.dateStr] = {
+        tasks: D.tasks.map(x=>({subject:x.subject,content:x.content,base:x.base,earned:x.earned,expEarn:x.expEarn,done:x.status==="done"})),
+        coin: D.todayCoin||0,
+        phoneUsed: D.phone.used
+      };
+    }
+    D.dateStr = t;
+    D.phone.free = D.phone.freeSetting || 15;
+    D.phone.used = 0;
+    D.todayCoin = 0;
+    // 自动加载启用的固定任务
+    D.tasks = D.fixedTasks.filter(f=>f.enabled).map(f=>({
+      subject:f.cat, content:f.name, minutes:f.duration, base:f.difficulty,
+      cat:f.cat==="学习"?"study":"life", status:"pending", startedAt:null, earned:0, expEarn:0, fixed:true
+    }));
+  }
+}
+
+/* ============================================================
+   音效
+============================================================ */
+let ac=null;
+function beep(f,d=0.12,type="sine",v=0.12){
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.type=type; o.frequency.value=f;
+    g.gain.setValueAtTime(v,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+d);
+  }catch(e){}
+}
+const sndDone=()=>{beep(660,.1);setTimeout(()=>beep(880,.15),100)};
+const sndLevel=()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18,"triangle"),i*120))};
+const sndErr=()=>beep(220,.2,"sawtooth",.08);
+
+/* ============================================================
+   渲染
+============================================================ */
+function getLevel(){
+  let lv=LEVELS[0];
+  LEVELS.forEach(l=>{if(D.exp>=l.need) lv=l});
+  return lv;
+}
+function getLvNum(){
+  let n=1;
+  LEVELS.forEach((l,i)=>{if(D.exp>=l.need) n=i+1});
+  return n;
+}
+
+function toggleSection(id){
+  const el = document.getElementById(id);
+  const arrow = document.getElementById(id+"Arrow");
+  if(el.style.display==="none"){
+    el.style.display = "block";
+    if(arrow) arrow.textContent = "点击收起 ▴";
+  }else{
+    el.style.display = "none";
+    if(arrow) arrow.textContent = "点击展开 ▾";
+  }
+}
+function editUserName(){
+  const n = prompt("给自己起个星际宇航员的名字：", D.userName || "小宇航员");
+  if(n && n.trim()){
+    D.userName = n.trim().slice(0,12);
+    save(); render(); toast("名字已更新");
+  }
+}
+function pickAvatar(){
+  const avatars = ["👨‍🚀","👩‍🚀","🚀","🌟","🌙","🪐","⭐","🌈","🦄","🐱","🐶","🦊"];
+  const pick = prompt("选择一个头像（输入对应序号）：\n" + avatars.map((a,i)=>`${i+1}.${a}`).join("  "));
+  if(pick){
+    const idx = Number(pick)-1;
+    if(idx>=0 && idx<avatars.length){
+      D.avatar = avatars[idx];
+      save(); render(); toast("头像已更换");
+    }
+  }
+}
+function openAdmin(){
+  document.getElementById("pwdModal").style.display="flex";
+  document.getElementById("pwdInput").value="";
+  document.getElementById("pwdInput").focus();
+}
+// 勋章等级：铜(1次)→银(3次)→金(5次)→铂金(10次)
+const BADGE_RANKS = [
+  {need:1, name:"铜", color:"#cd7f32"},
+  {need:3, name:"银", color:"#c0c0c0"},
+  {need:5, name:"金", color:"#ffd700"},
+  {need:10, name:"铂金", color:"#e5e4e2"}
+];
+const BADGE_DEFS = [
+  {id:"restraint", name:"克制勋章", icon:"🛡️", desc:"当天不申请额外手机时间", reward:5},
+  {id:"punctual", name:"守时星", icon:"⏰", desc:"提前完成任意任务", reward:3},
+  {id:"reading", name:"阅读之星", icon:"📚", desc:"连续7天完成阅读任务", reward:10},
+  {id:"sports", name:"运动达人", icon:"💪", desc:"连续7天完成运动任务", reward:10},
+  {id:"self", name:"自律之星", icon:"🌟", desc:"一天全部任务按时完成", reward:5},
+  {id:"streak", name:"连续之星", icon:"🔥", desc:"连续7天完成所有任务", reward:15},
+  {id:"honest", name:"诚实勋章", icon:"🤝", desc:"主动承认错误", reward:5},
+  {id:"sleep", name:"早睡之星", icon:"🌙", desc:"连续7天记录睡前流程", reward:8}
+];
+function getBadgeCount(id){
+  return (D.badgeCounts && D.badgeCounts[id]) || 0;
+}
+function getBadgeRank(count){
+  let rank = BADGE_RANKS[0];
+  for(const r of BADGE_RANKS){ if(count>=r.need) rank = r; }
+  return rank;
+}
+function awardBadge(id){
+  const def = BADGE_DEFS.find(b=>b.id===id) || (D.customBadges||[]).find(b=>b.id===id);
+  if(!def) return;
+  if(!D.badgeCounts) D.badgeCounts = {};
+  D.badgeCounts[id] = (D.badgeCounts[id]||0) + 1;
+  const count = D.badgeCounts[id];
+  const rank = getBadgeRank(count);
+  // 首次获得才加积分奖励
+  if(count===1){
+    D.coin += def.reward;
+    toast(`🎉 获得【${def.name}】+${def.reward}积分`);
+  }else{
+    // 升级提示
+    const prevRank = getBadgeRank(count-1);
+    if(rank.name !== prevRank.name){
+      toast(`🏆【${def.name}】升级为 ${rank.name} 勋章！`);
+      D.coin += def.reward * 2;
+    }
+  }
+  // 更新已获得列表
+  if(!D.badges.find(b=>b.id===id)){
+    D.badges.push({id, name:def.name, icon:def.icon, desc:def.desc, date:new Date().toLocaleDateString()});
+  }
+  save(); render();
+}
+function addCustomBadge(){
+  const name = prompt("勋章名称：");
+  if(!name) return;
+  const icon = prompt("图标（输入一个emoji，如🎖️）：") || "🎖️";
+  const desc = prompt("规则描述：") || "";
+  const reward = Number(prompt("奖励积分（默认5）：")) || 5;
+  if(!D.customBadges) D.customBadges = [];
+  D.customBadges.push({id:"custom_"+Date.now(), name, icon, desc, reward});
+  save(); render(); toast("已添加自定义勋章");
+}
+function renderBadges(){
+  const allBadges = [...BADGE_DEFS, ...(D.customBadges||[])];
+  // 首页预览
+  const preview = document.getElementById("badgePreview");
+  if(preview){
+    const earned = D.badges.slice(-8);
+    preview.innerHTML = earned.map(b=>{
+      const count = getBadgeCount(b.id);
+      const rank = getBadgeRank(count);
+      return `<div style="text-align:center;padding:6px;background:rgba(255,255,255,.05);border-radius:10px;min-width:50px">
+        <div style="font-size:24px">${b.icon}</div>
+        <div style="font-size:9px;color:var(--dim)">${rank.name}${b.name}</div>
+      </div>`;
+    }).join("") || "<p style='color:var(--dim);font-size:13px'>暂无勋章，完成目标即可获得</p>";
+  }
+  document.getElementById("badgeCountTxt").textContent = D.badges.length + " 枚";
+  // 荣誉墙列表
+  const list = document.getElementById("badgeList");
+  if(list){
+    list.innerHTML = allBadges.map(def=>{
+      const count = getBadgeCount(def.id);
+      const got = D.badges.find(b=>b.id===def.id);
+      const rank = getBadgeRank(count);
+      const nextRank = BADGE_RANKS.find(r=>r.need>count);
+      return `<div class="task" style="border-left-color:${got?rank.color:'var(--dim)'}">
+        <div class="name" style="font-size:20px">${got?def.icon:"🔒"} ${def.name} ${got?`<span style="font-size:11px;color:${rank.color}">[${rank.name}]</span>`:`<span style="font-size:10px;color:var(--dim)">未解锁</span>`}</div>
+        <div class="meta">${def.desc} · 奖励 +${def.reward} 积分</div>
+        ${got?`<div class="meta" style="color:var(--dim)">已获得 ${count} 次 ${nextRank?`→ 再获 ${nextRank.need-count} 次升${nextRank.name}`:"→ 最高级"}</div>`:""}
+      </div>`;
+    }).join("");
+  }
+}
+function render(){
+  ensureToday();
+  const lv = getLevel();
+  const lvNum = getLvNum();
+  document.getElementById("topCoin").textContent = "⭐ "+D.coin;
+  document.getElementById("expTxt").textContent = "经验 "+D.exp;
+  // 首页用户信息
+  document.getElementById("homeUserName").textContent = (D.userName||"小宇航员") + " ✏️";
+  document.getElementById("homeLevelTxt").textContent = `Lv.${lvNum} ${lv.n}`;
+  document.getElementById("homeCoin").textContent = D.coin;
+  document.getElementById("homeExp").textContent = D.exp;
+  document.getElementById("homeAvatar").textContent = D.avatar || "👨‍🚀";
+  renderBadges();
+
+  let gh="";
+  LEVELS.forEach((l,i)=>{
+    const unlocked = D.exp>=l.need;
+    const isCurrent = lv===l;
+    gh += `<div class="lv ${isCurrent?'current':''}">
+      <div class="n">Lv${i+1} · ${l.n}</div>
+      <div class="base">${l.base}</div>
+      <span class="tag">${isCurrent?"⭐ 当前":unlocked?"已解锁":"待解锁"}</span>
+    </div>`;
+  });
+  document.getElementById("levelGrid").innerHTML = gh;
+
+  const pending = D.tasks.filter(t=>t.status==="pending").length;
+  const running = D.tasks.filter(t=>t.status==="running").length;
+  const done = D.tasks.filter(t=>t.status==="done").length;
+  document.getElementById("sPending").textContent = pending;
+  document.getElementById("sRunning").textContent = running;
+  document.getElementById("sDone").textContent = done;
+  document.getElementById("todayCoinTxt").textContent = D.todayCoin || 0;
+  document.getElementById("dailyCapTxt").textContent = D.dailyCap || 20;
+  const total = D.tasks.length;
+  const pct = total? Math.round(done/total*100):0;
+  document.getElementById("pctTxt").textContent = pct+"%";
+  document.getElementById("pctFill").style.width = pct+"%";
+
+  const dayIdx = Math.floor(Date.now()/86400000) % FACTS.length;
+  document.getElementById("factTxt").textContent = FACTS[dayIdx];
+  const qIdx = Math.floor(Date.now()/86400000) % QUOTES.length;
+  document.getElementById("dailyQuote").textContent = "💬 " + QUOTES[qIdx];
+
+  // 我的宇宙 - 轨道星球
+  const layer = document.getElementById("orbitLayer");
+  if(!D.planets.length){
+    layer.innerHTML = "<p style='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:13px'>还没有星球，升级 Lv2 开始收藏你的第一颗！</p>";
+  }else{
+    layer.innerHTML = "";
+    D.planets.forEach((p,i)=>{
+      const orbitR = 30 + i*22;
+      const orbit = document.createElement("div");
+      orbit.style.cssText = `position:absolute;left:50%;top:50%;width:${orbitR*2}px;height:${orbitR*2}px;
+        margin:-${orbitR}px 0 0 -${orbitR}px;border:1px dashed rgba(255,255,255,.1);border-radius:50%;
+        animation:orbitSpin ${8+i*2}s linear infinite`;
+      const dot = document.createElement("div");
+      dot.style.cssText = `position:absolute;top:-8px;left:50%;margin-left:-8px;width:16px;height:16px;border-radius:50%;
+        background:radial-gradient(circle at 30% 30%,#fff,${p.color});
+        box-shadow:0 0 10px ${p.color};`;
+      dot.title = p.name;
+      const label = document.createElement("div");
+      label.style.cssText = `position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:9px;color:${p.color};white-space:nowrap`;
+      label.textContent = p.name;
+      orbit.appendChild(dot); orbit.appendChild(label);
+      layer.appendChild(orbit);
+    });
+  }
+
+  // 神秘舱
+  let mh="";
+  MYSTERIES.forEach((m,idx)=>{
+    const unlocked = lvNum>=m.lv;
+    const discovered = D.discovered.includes(idx);
+    let click = "";
+    if(unlocked && !discovered) click = `onclick="discover(${idx})"`;
+    else if(unlocked && discovered && m.lv===2) click = "onclick='openLottery()'";
+    else if(unlocked && discovered && m.lv===7) click = "onclick='openWeekBox()'";
+    mh += `<div class="mystery ${unlocked?'unlocked':'locked'}" ${click} style="${!unlocked?'cursor:default':''}">
+      <div class="ic">${!unlocked?"🔒":discovered?m.ic:"❓"}</div>
+      <div class="nm">${!unlocked?"???":discovered?m.nm:"未发现"}</div>
+      <div class="need">${!unlocked?"Lv"+m.lv:discovered?"点我试试":"🔍 探索"}</div>
+    </div>`;
+  });
+  document.getElementById("mysteryGrid").innerHTML = mh;
+
+  // 任务
+  let th="";
+  D.tasks.forEach((t,i)=>{
+    const base = t.base || 3;
+    const perStar = D.perStar || 1;
+    const catIcon = t.cat==="life" ? "🏠" : "📚";
+    let rewardTxt = `${catIcon} 预计 ${t.minutes} 分钟 · ${"⭐".repeat(base)} (${base*perStar} 分)`;
+    let actionBtns = "";
+    const orderBtns = `<button class="btn ghost small" onclick="moveTask(${i},-1)" title="上移">↑</button>
+                      <button class="btn ghost small" onclick="moveTask(${i},1)" title="下移">↓</button>`;
+    if(t.status==="pending"){
+      actionBtns = `<button class="btn ok small" onclick="startTask(${i})">▶ 开始</button>
+                    <button class="btn warn small" onclick="delTask(${i})">删除</button>${orderBtns}`;
+    }else if(t.status==="running"){
+      actionBtns = `<div class="timer" id="timer-${i}">--:--</div>
+                    <button class="btn ok small" onclick="finishTask(${i})">✓ 我完成了</button>
+                    <button class="btn warn small" onclick="delTask(${i})">删除</button>${orderBtns}`;
+    }else{
+      rewardTxt = `完成 · ${t.earned} 分 + ${t.expEarn||1} 经验`;
+    }
+    th += `<div class="task ${t.status}">
+      <div class="name">${i+1}. ${t.subject} · ${t.content}</div>
+      <div class="meta">${rewardTxt}</div>
+      <div class="btns">${actionBtns}</div>
+    </div>`;
+  });
+  document.getElementById("taskList").innerHTML = th || "<p style='color:var(--dim);font-size:13px;text-align:center;padding:20px'>还没有任务，添加第一个吧 🚀</p>";
+  document.getElementById("taskDate").textContent = todayStr();
+
+  // 商店
+  let sh="";
+  D.shop.forEach((s,i)=>{
+    sh += `<div class="task" style="border-left-color:var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="name">${s.name}</div><div class="meta">${s.cost} 星 ${s.phone?`· +${s.phone}分钟手机`:""}</div></div>
+        <button class="btn small" onclick="buy(${i})">兑换</button>
+      </div></div>`;
+  });
+  document.getElementById("shopList").innerHTML = sh;
+
+  document.getElementById("wishList").innerHTML = D.wishes.map(w=>`<span style="display:inline-block;background:rgba(255,217,122,.15);color:var(--gold);padding:6px 10px;border-radius:8px;margin:3px;font-size:12px">${w}</span>`).join("");
+
+  // 手机
+  document.getElementById("pFree").textContent = D.phone.free;
+  document.getElementById("pUsed").textContent = D.phone.used;
+  document.getElementById("pAvail").textContent = D.phone.avail;
+  // 今日申请次数提示
+  const day = new Date().getDay();
+  const isWeekend = (day===0||day===6);
+  const limit = isWeekend ? 3 : 1;
+  const todayCount = D.phone.requests.filter(r=>r.date===todayStr()).length;
+  document.getElementById("applyHint").textContent =
+    `📌 今天还能申请 ${Math.max(0,limit-todayCount)} 次（${isWeekend?"假期":"上学日"}${limit}次上限）`;
+  const fm = document.getElementById("setFreeMin");
+  if(fm) fm.value = D.phone.freeSetting || 15;
+  const ps = document.getElementById("setPerStar");
+  if(ps) ps.value = D.perStar || 1;
+  const dc = document.getElementById("setDailyCap");
+  if(dc) dc.value = D.dailyCap || 20;
+  document.getElementById("phoneRequests").innerHTML = D.phone.requests.slice().reverse().map(r=>
+    `<div class="task" style="border-left-color:${r.status==='approved'?'var(--green)':r.status==='rejected'?'var(--red)':'var(--orange)'}">
+      <div class="name">${r.minutes} 分钟</div>
+      <div class="meta">理由：${r.reason}</div>
+      <div class="reward">${r.status==='approved' ? (r.used?'✅ 已使用':'⏳ 已批准待使用') : r.status==='rejected' ? '❌ 未批准' : '⏳ 等待审批'}</div>
+    </div>`).join("") || "<p style='color:var(--dim);font-size:13px'>还没有申请</p>";
+
+  // 协议
+  document.getElementById("agreementText").textContent = D.agreement;
+  document.getElementById("printAgreement").textContent = D.agreement;
+  document.getElementById("signChild").innerHTML = D.signChild ? `<img src="${D.signChild}" style="height:40px;max-width:100%"><div style="font-size:10px;color:var(--dim)">${D.signChildDate||""}</div>` : "—";
+  document.getElementById("signParent").innerHTML = D.signParent ? `<img src="${D.signParent}" style="height:40px;max-width:100%"><div style="font-size:10px;color:var(--dim)">${D.signParentDate||""}</div>` : "—";
+
+  // 提案
+  document.getElementById("propList").innerHTML = D.proposals.slice().reverse().map(p=>
+    `<div class="task" style="border-left-color:var(--purple)">
+      <div class="name">【${p.cat}】</div>
+      <div class="meta">${p.text}</div>
+      <div class="reward">${p.status==='pending'?'⏳ 等待审批':p.status==='accepted'?'✅ 已采纳':'❌ 未采纳'}</div>
+    </div>`).join("") || "<p style='color:var(--dim);font-size:13px'>还没有提案</p>";
+
+  // 家长面板
+  document.getElementById("adminPhone").innerHTML = D.phone.requests.map((r,i)=>{
+    if(r.status==='pending'){
+      return `<div class="task"><div class="name">${r.minutes} 分钟</div>
+        <div class="meta">${r.reason}</div>
+        <div class="btns">
+          <button class="btn ok small" onclick="approvePhone(${i})">批准</button>
+          <button class="btn warn small" onclick="rejectPhone(${i})">拒绝</button>
+        </div></div>`;
+    }
+    if(r.status==='approved' && !r.used){
+      return `<div class="task" style="border-left-color:var(--green)"><div class="name">${r.minutes} 分钟</div>
+        <div class="meta">${r.reason}</div>
+        <div class="btns">
+          <button class="btn ok small" onclick="markUsed(${i})">✓ 确认孩子已使用</button>
+        </div></div>`;
+    }
+    return "";
+  }).join("") || "<p style='color:var(--dim);font-size:13px'>暂无待审批/待确认</p>";
+
+  document.getElementById("adminProp").innerHTML = D.proposals.filter(p=>p.status==='pending').map(p=>{
+    const realIdx = D.proposals.indexOf(p);
+    return `<div class="task"><div class="name">【${p.cat}】</div>
+      <div class="meta">${p.text}</div>
+      <div class="btns">
+        <button class="btn ok small" onclick="approveProp(${realIdx})">采纳</button>
+        <button class="btn warn small" onclick="rejectProp(${realIdx})">驳回</button>
+      </div></div>`;
+  }).join("") || "<p style='color:var(--dim);font-size:13px'>暂无待审批</p>";
+
+  document.getElementById("adminTasks").innerHTML = D.tasks.map((t,i)=>
+    `<div class="task"><div class="name">${t.subject} · ${t.content}</div>
+     <div class="meta">状态：${t.status} · ${t.minutes}分钟</div>
+     <div class="btns"><button class="btn warn small" onclick="delTask(${i})">删除</button></div></div>`).join("") || "<p style='color:var(--dim);font-size:13px'>今日无任务</p>";
+
+  document.getElementById("adminShopList").innerHTML = D.shop.map((s,i)=>
+    `<div class="task" style="border-left-color:var(--gold)"><div class="name">${s.name} · ${s.cost} 星</div>
+     <div class="btns"><button class="btn warn small" onclick="delShopItem(${i})">删除</button></div></div>`).join("");
+
+  document.getElementById("fixedTaskList").innerHTML = D.fixedTasks.map((f,i)=>
+    `<div class="task" style="border-left-color:${f.enabled?'var(--green)':'var(--dim)'}">
+      <div class="name">${f.enabled?'✅':'⏸️'} ${f.name} <span style="color:var(--gold);font-size:11px">⏱ ${f.duration}分钟</span> <span style="color:var(--dim);font-size:11px">${f.cat} · ${'⭐'.repeat(f.difficulty)}</span></div>
+      <div class="btns">
+        <button class="btn ghost small" onclick="toggleFixedTask(${i})">${f.enabled?"停用":"启用"}</button>
+        <button class="btn warn small" onclick="delFixedTask(${i})">删除</button>
+      </div></div>`).join("") || "<p style='color:var(--dim);font-size:13px'>暂无固定任务</p>";
+}
+
+/* ============================================================
+   动作
+============================================================ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+function addTask(){
+  const sub = document.getElementById("fSubject").value;
+  const con = document.getElementById("fContent").value.trim();
+  const min = Number(document.getElementById("fMinutes").value);
+  const base = Number(document.getElementById("fDifficulty").value);
+  const cat = document.getElementById("fCategory").value;
+  if(!con){toast("写点内容吧");return}
+  if(!min||min<5){toast("至少5分钟");return}
+  D.tasks.push({subject:sub,content:con,minutes:min,base:base,cat:cat,status:"pending",startedAt:null,earned:0,bonus:0});
+  document.getElementById("fContent").value="";
+  save(); render(); sndDone();
+  toast("任务已添加，调整顺序后开始吧");
+}
+function moveTask(i, dir){
+  const j = i+dir;
+  if(j<0||j>=D.tasks.length) return;
+  const t = D.tasks.splice(i,1)[0];
+  D.tasks.splice(j,0,t);
+  save(); render();
+}
+function delTask(i){
+  if(!confirm("删除这个任务？")) return;
+  D.tasks.splice(i,1); save(); render();
+}
+function startTask(i){
+  D.tasks[i].status="running";
+  D.tasks[i].startedAt=Date.now();
+  save(); render(); sndDone(); toast("开始！专注这一段时间 🎯");
+}
+function finishTask(i){
+  const t = D.tasks[i];
+  const perStar = D.perStar || 1;
+  const base = (t.base || 3) * perStar;
+  // 积分：完成就给（按难度），受每日上限
+  let coinEarn = base;
+  const cap = D.dailyCap || 20;
+  let msg;
+  if(D.todayCoin + coinEarn > cap){
+    coinEarn = Math.max(0, cap - D.todayCoin);
+    msg = coinEarn<=0 ? `今日积分已达上限（${cap}分），本次只加经验` : `✅ 完成，${coinEarn} 分（已达上限）`;
+  }else{
+    msg = `✅ 完成任务，${coinEarn} 分`;
+  }
+  // 经验：涨得慢，约为积分的一半，用于解锁星球
+  const expEarn = Math.max(1, Math.floor(coinEarn * 0.5));
+  D.todayCoin += coinEarn;
+  t.status="done"; t.earned=coinEarn; t.expEarn=expEarn;
+  D.coin += coinEarn;
+  D.exp += expEarn;
+  const oldLv = getLvNum();
+  save(); render();
+  sndLevel();
+  floatScore(coinEarn);
+  toast(msg + `（经验+${expEarn}）`);
+  if(getLvNum() > oldLv){
+    setTimeout(()=>{
+      const newLv = getLvNum();
+      const color = PLANET_COLORS[Math.floor(Math.random()*PLANET_COLORS.length)];
+      const name = prompt(`🎉 恭喜升级到 Lv${newLv}！\n\n🎁 你获得了一颗新的星球！\n给它起个名字吧（2-6个字）：`);
+      if(name && name.trim()){
+        D.planets.push({name:name.trim().slice(0,8), color, lv:newLv});
+        save(); render();
+        setTimeout(()=>toast(`🌍 ${name.trim()} 已加入你的收藏！`), 500);
+      }
+    }, 1500);
+  }
+  // 自动颁发勋章
+  const early = t.startedAt && (Date.now()-new Date(t.startedAt).getTime()) < (t.minutes*60*1000*0.7);
+  if(early) awardBadge("punctual");
+  if(D.tasks.every(x=>x.status==="done")) awardBadge("self");
+  // 固定任务自动对应勋章
+  if(t.content && t.content.includes("阅读")) awardBadge("reading");
+  if(t.content && (t.content.includes("运动")||t.content.includes("锻炼"))) awardBadge("sports");
+  if(t.content && t.content.includes("睡前")) awardBadge("sleep");
+}
+
+/* 飘分动画 */
+function floatScore(amount){
+  const el = document.createElement("div");
+  el.textContent = "+"+amount+" ⭐";
+  el.style.cssText = `position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:32px;font-weight:900;color:var(--gold);z-index:999;
+    text-shadow:0 0 20px var(--gold);pointer-events:none;
+    transition:all 1.2s ease-out`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{
+    el.style.top = "30%";
+    el.style.opacity = "0";
+    el.style.transform = "translate(-50%,-50%) scale(1.5)";
+  });
+  setTimeout(()=>el.remove(), 1300);
+}
+
+function buy(i){
+  const s = D.shop[i];
+  if(D.coin < s.cost){sndErr(); toast("星光不够哦");return}
+  D.coin -= s.cost;
+  if(s.phone) D.phone.avail += s.phone;
+  save(); render(); sndDone(); toast(`兑换成功：${s.name}`);
+}
+
+function addShopItem(){
+  const n = document.getElementById("shopName").value.trim();
+  const c = Number(document.getElementById("shopCost").value);
+  if(!n||!c){toast("填完整");return}
+  D.shop.push({name:n, cost:c});
+  document.getElementById("shopName").value="";
+  document.getElementById("shopCost").value="";
+  save(); render(); toast("已添加");
+}
+function delShopItem(i){
+  if(!confirm("删除这个兑换项？")) return;
+  D.shop.splice(i,1); save(); render();
+}
+
+function addWish(){
+  const v = document.getElementById("wishInput").value.trim();
+  if(!v) return;
+  D.wishes.push(v); document.getElementById("wishInput").value="";
+  save(); render();
+}
+
+function submitPhone(){
+  const reason = document.getElementById("pReason").value.trim();
+  const min = Number(document.getElementById("pMinutes").value);
+  if(!reason){toast("写一下使用理由");return}
+  if(!min||min<5){toast("时长至少5分钟");return}
+  // 申请次数限制：上学日1次，周末3次
+  const day = new Date().getDay();
+  const isWeekend = (day===0||day===6);
+  const limit = isWeekend ? 3 : 1;
+  const todayCount = D.phone.requests.filter(r=>r.date===todayStr()).length;
+  if(todayCount >= limit){
+    sndErr();
+    toast(isWeekend ? `周末最多申请 ${limit} 次` : `上学日最多申请 ${limit} 次（已用完）`);
+    return;
+  }
+  D.phone.requests.push({reason,minutes:min,status:"pending",date:todayStr(),used:false});
+  document.getElementById("pReason").value="";
+  save(); render(); toast(`申请已提交（今天还能申请 ${limit-todayCount-1} 次）`);
+}
+function approvePhone(i){
+  const r = D.phone.requests[i];
+  r.status="approved"; D.phone.avail += r.minutes;
+  save(); render(); toast(`已批准 +${r.minutes} 分钟`);
+}
+function rejectPhone(i){D.phone.requests[i].status="rejected";save();render()}
+function markUsed(i){
+  const r = D.phone.requests[i];
+  r.used = true;
+  D.phone.used += r.minutes;
+  D.phone.avail = Math.max(0, D.phone.avail - r.minutes);
+  save(); render(); toast("已确认使用记录");
+}
+function freeUsedToday(){
+  if(D.phone.free <= 0){toast("今天的免费时间已用完啦");return}
+  D.phone.used += D.phone.free;
+  D.phone.free = 0;
+  // 如果今天没申请额外手机时间，发克制勋章
+  if(!D.phone.requests.some(r=>r.date===todayStr() && r.status==="approved")){
+    awardBadge("restraint");
+  }
+  save(); render();
+  sndDone(); toast("已记录：今日免费时间用完");
+}
+function putDownPhone(){
+  if(!D.phone.putDownDate || D.phone.putDownDate !== todayStr()){
+    D.phone.putDownDate = todayStr();
+    awardBadge("punctual");
+    awardBadge("restraint");
+    save(); render();
+    sndDone();
+    toast("🌙 好样的！按时放下手机，获得守时星+克制勋章");
+  }else{
+    toast("今天已经打卡过了");
+  }
+}
+
+function submitProposal(){
+  const text = document.getElementById("propText").value.trim();
+  if(!text){toast("写点内容吧");return}
+  D.proposals.push({cat:activeCat,text,status:"pending"});
+  document.getElementById("propText").value="";
+  document.getElementById("propRemind").style.display="block";
+  save(); render(); toast("提案已提交，记得找爸爸妈妈聊聊 💬");
+}
+function approveProp(i){D.proposals[i].status="accepted";save();render();toast("已采纳")}
+function rejectProp(i){D.proposals[i].status="rejected";save();render()}
+
+function setCoinExp(){
+  const c = document.getElementById("setCoin").value;
+  const e = document.getElementById("setExp").value;
+  if(c!=="") D.coin=Number(c);
+  if(e!=="") D.exp=Number(e);
+  save(); render(); toast("已保存");
+}
+function setFreeMin(){
+  const v = Number(document.getElementById("setFreeMin").value);
+  if(v<0||v>120){toast("0-120之间");return}
+  D.phone.freeSetting = v;
+  D.phone.free = v;
+  save(); render(); toast("免费时间已设置为 "+v+" 分钟/天");
+}
+function setPerStar(){
+  const v = Number(document.getElementById("setPerStar").value);
+  if(v<1||v>5){toast("1-5之间");return}
+  D.perStar = v;
+  save(); render(); toast(`每星积分已设为 ${v}，1星任务=${v}分，5星任务=${v*5}分`);
+}
+function setDailyCap(){
+  const v = Number(document.getElementById("setDailyCap").value);
+  if(v<5||v>100){toast("5-100之间");return}
+  D.dailyCap = v;
+  save(); render(); toast(`每日积分上限已设为 ${v} 分`);
+}
+function addFixedTask(){
+  const n = document.getElementById("ftName").value.trim();
+  if(!n){toast("填任务名");return}
+  const cat = document.getElementById("ftCat").value;
+  const diff = Number(document.getElementById("ftDiff").value);
+  const dur = Number(document.getElementById("ftDuration").value) || 20;
+  D.fixedTasks.push({id:Date.now(), name:n, cat, difficulty:diff, duration:dur, enabled:true});
+  document.getElementById("ftName").value="";
+  save(); render(); toast("已添加");
+}
+function toggleFixedTask(i){
+  D.fixedTasks[i].enabled = !D.fixedTasks[i].enabled;
+  save(); render();
+}
+function delFixedTask(i){
+  if(!confirm("删除这个固定任务？")) return;
+  D.fixedTasks.splice(i,1);
+  save(); render();
+}
+
+function changePwd(){
+  const v = document.getElementById("newPwd").value;
+  if(!/^\d{4}$/.test(v)){toast("输入4位数字");return}
+  D.adminPwd = v;
+  document.getElementById("newPwd").value="";
+  save(); toast("密码已修改");
+}
+
+function resetToday(){
+  if(!confirm("清空今日所有任务？")) return;
+  D.tasks=[]; D.phone.used=0; D.phone.free=D.phone.freeSetting||15;
+  save(); render();
+}
+function exportData(){
+  const blob = new Blob([JSON.stringify(D,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "星际自律学院数据.json";
+  a.click();
+}
+
+/* 协议编辑 */
+document.getElementById("agreeEditBtn").onclick = ()=>{
+  document.getElementById("agreeView").style.display="none";
+  document.getElementById("agreeEdit").style.display="block";
+  document.getElementById("agreementEdit").value = D.agreement;
+};
+function saveAgreement(){
+  D.agreement = document.getElementById("agreementEdit").value;
+  document.getElementById("agreeView").style.display="block";
+  document.getElementById("agreeEdit").style.display="none";
+  save(); render(); toast("协议已保存");
+}
+
+/* 语音 */
+function startVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){toast("浏览器不支持语音，建议用 Chrome");return}
+  const r = new SR();
+  r.lang="zh-CN"; r.interimResults=false;
+  r.onresult = (e)=>{
+    document.getElementById("fContent").value = e.results[0][0].transcript;
+    toast("识别完成");
+  };
+  r.onerror = ()=>toast("没听清，再试一次");
+  r.start();
+  toast("🎤 正在听...");
+}
+
+/* 密码 */
+function checkPwd(){
+  const v = document.getElementById("pwdInput").value;
+  if(v === D.adminPwd){
+    document.getElementById("pwdModal").style.display="none";
+    document.getElementById("pwdInput").value="";
+    switchTab("admin", true);
+  }else{
+    sndErr(); toast("密码错误");
+  }
+}
+function closePwd(){
+  document.getElementById("pwdModal").style.display="none";
+  document.getElementById("pwdInput").value="";
+  pendingTab = null;
+}
+
+/* 抽奖 */
+function openLottery(){
+  if(D.lottery.lastDraw === todayStr()){
+    toast("今天已经抽过啦，明天再来");
+    return;
+  }
+  document.getElementById("lotteryModal").style.display="flex";
+}
+function closeLottery(){document.getElementById("lotteryModal").style.display="none"}
+function spinWheel(){
+  const rewards = [
+    {label:"+5星",coin:5},{label:"+10星",coin:10},{label:"+20星",coin:20},
+    {label:"+50星",coin:50},{label:"免做一项",coin:15},{label:"选电影",coin:0,special:"选电影一次"},
+    {label:"+15星",coin:15},{label:"+8星",coin:8}
+  ];
+  const idx = Math.floor(Math.random()*rewards.length);
+  const deg = 1800 + idx*45 + Math.random()*30;
+  const wheel = document.getElementById("wheel");
+  wheel.style.transform = `rotate(${deg}deg)`;
+  setTimeout(()=>{
+    const r = rewards[idx];
+    if(r.coin) D.coin += r.coin;
+    D.lottery.lastDraw = todayStr();
+    D.lottery.history.push({date:todayStr(), reward:r.label});
+    save(); render();
+    sndLevel();
+    document.getElementById("lotteryTip").textContent = `🎉 恭喜获得：${r.label}${r.special?"（"+r.special+"）":""}`;
+  }, 3200);
+}
+
+/* 每周宝箱 */
+function openWeekBox(){
+  const wk = new Date();
+  const weekKey = wk.getFullYear()+"-W"+Math.ceil((((wk-new Date(wk.getFullYear(),0,1))/86400000)+new Date(wk.getFullYear(),0,1).getDay()+1)/7);
+  if(D.weekBox.lastOpen === weekKey){
+    toast("本周宝箱已开过，下周再来");return;
+  }
+  const bonus = 30 + Math.floor(Math.random()*50);
+  D.coin += bonus;
+  D.weekBox.lastOpen = weekKey;
+  save(); render();
+  sndLevel();
+  toast(`🎁 本周宝箱开出 ${bonus} 星！`);
+}
+
+/* 发现惊喜 */
+function discover(idx){
+  const m = MYSTERIES[idx];
+  D.discovered.push(idx);
+  save(); render();
+  sndLevel();
+  toast(`🔍 发现新惊喜：${m.nm}！`);
+}
+
+/* 导航 */
+function switchTab(v, skipPwd){
+  if(v==="admin" && !skipPwd){
+    document.getElementById("pwdModal").style.display="flex";
+    document.getElementById("pwdInput").focus();
+    return;
+  }
+  document.querySelectorAll(".tabbar button").forEach(b=>b.classList.remove("active"));
+  const btn = document.querySelector(`.tabbar button[data-v="${v}"]`);
+  if(btn) btn.classList.add("active");
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
+  document.getElementById("view-"+v).classList.add("active");
+  if(v==="cal") renderCal();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tabbar button").forEach(b=>{
+  b.onclick=()=>switchTab(b.dataset.v);
+});
+document.querySelectorAll("#catBar button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll("#catBar button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    activeCat=b.dataset.cat;
+  };
+});
+
+/* 倒计时 */
+setInterval(()=>{
+  D.tasks.forEach((t,i)=>{
+    if(t.status==="running"){
+      const el = document.getElementById("timer-"+i);
+      if(el){
+        const used = (Date.now()-t.startedAt)/1000;
+        const remain = Math.max(0, t.minutes*60 - used);
+        const m = Math.floor(remain/60);
+        const s = Math.floor(remain%60);
+        el.textContent = `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+        el.style.color = remain<60 ? "var(--red)" : "var(--orange)";
+      }
+    }
+  });
+}, 1000);
+
+/* ============================================================
+   签名
+============================================================ */
+let signTarget = null;
+let signCtx = null, drawing = false;
+function openSign(who){
+  signTarget = who;
+  document.getElementById("signTitle").textContent = who==="child" ? "✍️ 孩子签名" : "✍️ 家长签名";
+  document.getElementById("signModal").style.display = "flex";
+  const cv = document.getElementById("signCanvas");
+  signCtx = cv.getContext("2d");
+  signCtx.fillStyle = "#fff";
+  signCtx.fillRect(0,0,cv.width,cv.height);
+  signCtx.strokeStyle = "#222";
+  signCtx.lineWidth = 2.5;
+  signCtx.lineCap = "round";
+  // 绑定事件（每次打开都重新绑定）
+  cv.ontouchstart = signStart;
+  cv.ontouchmove = signMove;
+  cv.ontouchend = signEnd;
+  cv.onmousedown = signStart;
+  cv.onmousemove = signMove;
+  cv.onmouseup = signEnd;
+  cv.onmouseleave = signEnd;
+}
+function closeSign(){document.getElementById("signModal").style.display="none"}
+function clearSign(){
+  const cv = document.getElementById("signCanvas");
+  signCtx.fillStyle = "#fff";
+  signCtx.fillRect(0,0,cv.width,cv.height);
+}
+function getPos(e){
+  const cv = document.getElementById("signCanvas");
+  const rect = cv.getBoundingClientRect();
+  const x = (e.touches?e.touches[0].clientX:e.clientX) - rect.left;
+  const y = (e.touches?e.touches[0].clientY:e.clientY) - rect.top;
+  return {x, y};
+}
+function signStart(e){
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  signCtx.beginPath();
+  signCtx.moveTo(p.x, p.y);
+}
+function signMove(e){
+  if(!drawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  signCtx.lineTo(p.x, p.y);
+  signCtx.stroke();
+}
+function signEnd(){drawing=false}
+function saveSign(){
+  const cv = document.getElementById("signCanvas");
+  const data = cv.toDataURL();
+  if(signTarget==="child"){
+    D.signChild = data;
+    D.signChildDate = new Date().toLocaleDateString();
+  }else{
+    D.signParent = data;
+    D.signParentDate = new Date().toLocaleDateString();
+  }
+  save(); render();
+  closeSign();
+  toast("签名已保存");
+}
+// 签名事件在 openSign 时绑定
+
+/* ============================================================
+   日历
+============================================================ */
+let calYear, calMonth;
+function initCal(){
+  const d = new Date();
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+}
+function changeMonth(delta){
+  calMonth += delta;
+  if(calMonth<0){calMonth=11;calYear--}
+  if(calMonth>11){calMonth=0;calYear++}
+  renderCal();
+}
+function renderCal(){
+  document.getElementById("calMonthLabel").textContent = `${calYear} 年 ${calMonth+1} 月`;
+  const first = new Date(calYear, calMonth, 1);
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const startDay = first.getDay();
+  let html = "";
+  const weekdays = ["日","一","二","三","四","五","六"];
+  weekdays.forEach(w=>html += `<div style="font-size:10px;color:var(--dim);padding:4px 0">${w}</div>`);
+  for(let i=0;i<startDay;i++) html += "<div></div>";
+  for(let d=1; d<=daysInMonth; d++){
+    const key = `${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const rec = D.history[key];
+    const isToday = key === todayStr();
+    const hasData = !!rec;
+    html += `<div onclick="showDay('${key}')" style="padding:8px 4px;border-radius:8px;cursor:pointer;
+      background:${isToday?'var(--gold)':hasData?'rgba(139,124,246,.2)':'transparent'};
+      color:${isToday?'#332':hasData?'var(--purple)':'var(--text)'};font-size:13px">
+      ${d}${hasData?'<div style="font-size:9px">★</div>':''}
+    </div>`;
+  }
+  document.getElementById("calGrid").innerHTML = html;
+}
+function showDay(key){
+  const rec = D.history[key];
+  const today = key === todayStr();
+  document.getElementById("calDetail").style.display = "block";
+  document.getElementById("calDetailTitle").textContent = key + (today?"（今天）":"");
+  if(!rec){
+    document.getElementById("calDetailBody").innerHTML = `<p style="color:var(--dim);font-size:13px">${today?'今天还没有完成记录':"这一天没有记录"}</p>`;
+    return;
+  }
+  let html = `<div style="font-size:12px;color:var(--dim);margin-bottom:10px">
+    积分：<b style="color:var(--gold)">${rec.coin||0}</b> · 手机使用：${rec.phoneUsed||0} 分钟</div>`;
+  (rec.tasks||[]).forEach(t=>{
+    html += `<div class="task" style="margin-bottom:6px;padding:8px">
+      <div style="font-size:13px">${t.done?'✅':'⬜'} ${t.subject} · ${t.content}</div>
+      <div style="font-size:11px;color:var(--dim)">${t.done?`+${t.earned}分 / +${t.expEarn}经验`:"未完成"}</div>
+    </div>`;
+  });
+  document.getElementById("calDetailBody").innerHTML = html;
+}
+
+/* 星空 */
+const cv = document.getElementById("starCanvas");
+const cx = cv.getContext("2d");
+let stars=[];
+function resize(){cv.width=innerWidth;cv.height=innerHeight}
+resize(); addEventListener("resize",resize);
+for(let i=0;i<70;i++){
+  stars.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    r:Math.random()*1.6+0.3,s:Math.random()*0.4+0.15,o:Math.random()*0.6+0.2});
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  stars.forEach(st=>{
+    st.y+=st.s;
+    if(st.y>cv.height){st.y=-2;st.x=Math.random()*cv.width}
+    cx.beginPath();cx.arc(st.x,st.y,st.r,0,Math.PI*2);
+    cx.fillStyle=`rgba(180,200,255,${st.o})`;cx.fill();
+  });
+  requestAnimationFrame(tick);
+}
+tick();
+
+initCal();
+render();
+renderCal();
+</script>
+</body>
+</html>
